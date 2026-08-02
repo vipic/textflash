@@ -294,6 +294,13 @@ public final class EventController {
     /// must be suppressed because TextFlash will re-inject the trigger itself.
     private func processKeyboardEvent(_ event: CGEvent) -> Bool {
         guard !isInjecting else { return false }
+
+        // 本应用窗口输入时完全放行，避免全局 tap / AX 查询干扰粘贴等编辑快捷键。
+        if let frontApp = frontmostApplicationInfo(), frontApp.isTextFlash {
+            inputBuffer = ""
+            return false
+        }
+
         refreshLastNonTextFlashApplication()
         guard !isFocusedApplicationExcluded() else {
             inputBuffer = ""

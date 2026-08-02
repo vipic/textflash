@@ -15,6 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 #endif
     private var aboutWindow: NSWindow?
     private var updateWindow: NSWindow?
+    private var editKeyMonitor: Any?
     private let updateErrorPath = "/tmp/textflash_update_error.txt"
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -22,6 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // LSUIElement：隐藏 Dock 图标
         NSApp.setActivationPolicy(.accessory)
         setupApplicationMenu()
+        installEditKeyMonitor()
 
         MenuBarManager.shared.setup()
         loadSnippetsIntoController()
@@ -45,6 +47,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        if let editKeyMonitor {
+            NSEvent.removeMonitor(editKeyMonitor)
+            self.editKeyMonitor = nil
+        }
         EventController.shared.stop()
     }
 
@@ -79,6 +85,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: keyEquivalent)
         item.target = self
         return item
+    }
+
+    /// 把编辑快捷键直接派给当前输入框（Settings-only App 没有稳定的 Edit 菜单可用）。
+    private func installEditKeyMonitor() {
+        guard editKeyMonitor == nil else { return }
+        editKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+            guard flags.contains(.command), !flags.contains(.option), !flags.contains(.control) else {
+                return event
+            }
+            guard let key = event.charactersIgnoringModifiers?.lowercased() else { return event }
+
+            let action: Selector?
+            switch key {
+            case "v" where !flags.contains(.shift):
+                action = #selector(NSText.paste(_:))
+            case "c" where !flags.contains(.shift):
+                action = #selector(NSText.copy(_:))
+            case "x" where !flags.contains(.shift):
+                action = #selector(NSText.cut(_:))
+            case "a" where !flags.contains(.shift):
+                action = #selector(NSText.selectAll(_:))
+            case "z" where flags.contains(.shift):
+                action = Selector(("redo:"))
+            case "z":
+                action = Selector(("undo:"))
+            default:
+                return event
+            }
+
+            if let action, NSApp.sendAction(action, to: nil, from: nil) {
+                return nil
+            }
+            return event
+        }
     }
 
     private func presentWindow(_ window: NSWindow) {

@@ -477,18 +477,27 @@ struct PlainTextEditor: NSViewRepresentable {
         scrollView.borderType = .noBorder
         scrollView.hasVerticalScroller = true
         scrollView.autohidesScrollers = true
+        context.coordinator.lastBoundText = text
+        textView.string = text
         return scrollView
     }
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
         guard let textView = scrollView.documentView as? NSTextView else { return }
-        if textView.string != text {
+        context.coordinator.text = $text
+        // 只同步外部写入（变量按钮等）。粘贴时 textView 已先变、binding 尚未跟上，
+        // 若直接 textView.string = text 会把刚粘贴的内容冲掉。
+        if text != context.coordinator.lastBoundText {
+            let selectedRanges = textView.selectedRanges
             textView.string = text
+            textView.selectedRanges = selectedRanges
+            context.coordinator.lastBoundText = text
         }
     }
 
     final class Coordinator: NSObject, NSTextViewDelegate {
         var text: Binding<String>
+        var lastBoundText: String = ""
 
         init(text: Binding<String>) {
             self.text = text
@@ -496,6 +505,7 @@ struct PlainTextEditor: NSViewRepresentable {
 
         func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
+            lastBoundText = textView.string
             text.wrappedValue = textView.string
         }
     }
