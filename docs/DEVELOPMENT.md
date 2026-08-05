@@ -5,7 +5,7 @@
 ## 环境要求
 
 - macOS 13+
-- Swift 5.9+
+- Swift 6.0 toolchain（`Package.swift` 为 `swift-tools-version: 6.0`，语言模式显式钉 `.v5`）
 - Xcode Command Line Tools
 
 ## 快速部署开发版
