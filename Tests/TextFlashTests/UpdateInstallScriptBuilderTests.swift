@@ -14,7 +14,9 @@ import Testing
     let script = UpdateInstallScriptBuilder.script()
 
     #expect(script.contains("更新包签名身份与当前 App 不匹配，拒绝自动更新"))
-    #expect(!script.contains("继续安装；系统权限可能需要重新授权"))
+    #expect(script.contains("签名证书已轮换（同一作者身份），继续安装；辅助功能权限可能需要重新授权"))
+    #expect(script.contains("codesign -dvv"))
+    #expect(script.contains(#"[ "$CURRENT_AUTH" = "Nekutai" ]"#))
 }
 
 @Test func updateInstallScriptPersistsUserVisibleFailureReason() {

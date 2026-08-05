@@ -75,7 +75,15 @@ enum UpdateInstallScriptBuilder {
 
         CURRENT_REQ=$(/usr/bin/codesign -dr - "$TARGET" 2>&1 | sed -n 's/^.*designated => //p')
         if [ -n "$CURRENT_REQ" ] && ! /usr/bin/codesign --verify --deep --strict -R="designated => $CURRENT_REQ" "$CANDIDATE" 2>/dev/null; then
-            fail_update "更新包签名身份与当前 App 不匹配，拒绝自动更新"
+            # -dvv 才会输出 Authority=；仅 -dv 在较新系统上没有该字段
+            CURRENT_AUTH=$(/usr/bin/codesign -dvv "$TARGET" 2>&1 | sed -n 's/^Authority=//p' | head -1)
+            CANDIDATE_AUTH=$(/usr/bin/codesign -dvv "$CANDIDATE" 2>&1 | sed -n 's/^Authority=//p' | head -1)
+            # 同一作者证书轮换（CN=Nekutai）时允许继续；辅助功能可能需重新授权
+            if [ -n "$CURRENT_AUTH" ] && [ "$CURRENT_AUTH" = "$CANDIDATE_AUTH" ] && [ "$CURRENT_AUTH" = "Nekutai" ]; then
+                echo "⚠️  签名证书已轮换（同一作者身份），继续安装；辅助功能权限可能需要重新授权" >&2
+            else
+                fail_update "更新包签名身份与当前 App 不匹配，拒绝自动更新。请手动下载：https://github.com/vipic/TextFlash/releases/latest"
+            fi
         fi
 
         echo "Replacing app..."
