@@ -40,7 +40,7 @@ mise run release-auto
 
 菜单栏：**左键**打开片段管理，**右键**打开菜单（检查更新、设置、Unicode 输入等）。
 
-CI 会在 macOS 上运行 shell 脚本语法检查、`swift test` 和 `swift build -c release`。重要变更详见 `CHANGELOG.md`。
+CI（GitHub Actions）与本地一致，执行 `mise run ci`（脚本语法检查 + `swift test` + release 构建）。源码按 `Core / Persistence / UI / Settings / Utils` 分层，Agent 约定见 [`AGENTS.md`](AGENTS.md)。重要变更详见 `CHANGELOG.md`。
 
 ## 片段管理
 
