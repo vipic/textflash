@@ -6,29 +6,23 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  test:
-    name: Swift Tests
+  ci:
+    name: mise run ci
     runs-on: macos-15
 
     steps:
-      - name: Check
+      - name: Checkout
         uses: actions/checkout@v5
 
       - name: Show Swift version
         run: swift --version
 
-      - name: Check shell scripts
-        run: |
-          bash -n deploy.sh
-          bash -n release.sh
-          bash -n scripts/next_version.sh
-          bash -n .mise/tasks/release
-          bash -n .mise/tasks/release-auto
-          bash -n .mise/tasks/publish
+      - name: Install mise
+        uses: jdx/mise-action@v2
 
-      - name: Run tests
-        run: swift test -Xswiftc -DDISABLE_PREVIEWS
-
-      - name: Build release
-        run: swift build -c release -Xswiftc -Osize -Xswiftc -DDISABLE_PREVIEWS
+      - name: CI
+        run: mise run ci
