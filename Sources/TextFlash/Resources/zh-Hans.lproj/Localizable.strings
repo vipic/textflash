@@ -44,6 +44,9 @@
 "settings.unicodeApps.manage" = "管理";
 "settings.unicodeApps.info.title" = "为什么使用 Unicode 输入？";
 "settings.unicodeApps.info.message" = "有些应用虽然能正常打字，但不稳定支持常规辅助功能文本写入。加入这里后，TextFlash 会改用 Unicode 按键输入，通常能改善聊天、编辑器或跨平台应用里的替换成功率。";
+"settings.version.title" = "版本与更新";
+"settings.version.subtitle" = "当前版本 v%@ · Build %@";
+"settings.version.check" = "检查更新";
 
 "exclusions.title" = "排除列表";
 "exclusions.choose" = "选择应用";

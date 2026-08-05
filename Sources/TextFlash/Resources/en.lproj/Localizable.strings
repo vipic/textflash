@@ -44,6 +44,9 @@
 "settings.unicodeApps.manage" = "Manage";
 "settings.unicodeApps.info.title" = "Why use Unicode input?";
 "settings.unicodeApps.info.message" = "Some apps accept typed text but do not reliably support standard Accessibility text insertion. Adding them here makes TextFlash use Unicode key input instead, which can improve replacement reliability in chat apps, editors, and cross-platform apps.";
+"settings.version.title" = "Version & Updates";
+"settings.version.subtitle" = "Current version v%@ · Build %@";
+"settings.version.check" = "Check for Updates";
 
 "exclusions.title" = "Exclusions";
 "exclusions.choose" = "Choose App";

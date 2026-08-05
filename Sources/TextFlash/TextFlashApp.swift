@@ -218,11 +218,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let hostingView = NSHostingView(rootView: SettingsView())
-        let contentSize = NSSize(width: 620, height: 560)
-        hostingView.frame = NSRect(origin: .zero, size: contentSize)
+        hostingView.sizingOptions = [.intrinsicContentSize]
 
         let window = NSWindow(
-            contentRect: NSRect(origin: .zero, size: contentSize),
+            contentRect: NSRect(origin: .zero, size: NSSize(width: 620, height: 1)),
             styleMask: [.titled, .closable, .miniaturizable],
             backing: .buffered,
             defer: false
@@ -230,8 +229,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.title = L10n.t("window.settings")
         window.isReleasedWhenClosed = false
         window.contentView = hostingView
-        window.center()
-        window.setFrameAutosaveName("TextFlashSettingsWindow")
+        let hadSavedFrame = window.setFrameUsingName("TextFlashSettingsWindow.v3")
+        window.setFrameAutosaveName("TextFlashSettingsWindow.v3")
+        // 高度始终按内容撑开；autosave 只保留位置
+        let fitting = hostingView.fittingSize
+        window.setContentSize(NSSize(width: 620, height: max(fitting.height, 1)))
+        if !hadSavedFrame {
+            window.center()
+        }
 
         NotificationCenter.default.addObserver(
             forName: NSWindow.willCloseNotification,

@@ -20,26 +20,23 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 16) {
                 headerBlock
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 14) {
-                        VStack(spacing: 10) {
-                            languageSection
-                            launchSection
-                            triggerModeSection
-                            timingSection
-                            unicodeAppsSection
-                            permissionSection
-                            exclusionSection
-                        }
-                        .padding(10)
-                        .glassContainer(cornerRadius: 16)
-                    }
-                    .padding(.bottom, 4)
+                VStack(spacing: 10) {
+                    languageSection
+                    launchSection
+                    triggerModeSection
+                    timingSection
+                    unicodeAppsSection
+                    permissionSection
+                    exclusionSection
+                    versionSection
                 }
+                .padding(10)
+                .glassContainer(cornerRadius: 16)
             }
             .padding(18)
         }
-        .frame(width: 620, height: 560)
+        .frame(width: 620)
+        .fixedSize(horizontal: false, vertical: true)
         .preferredColorScheme(.light)
         .sheet(isPresented: $showUnicodeApps) {
             UnicodeAppsSettingsView()
@@ -67,51 +64,18 @@ struct SettingsView: View {
         }
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L10n.t("settings.title"))
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(SettingsPalette.primaryText)
-                Text(L10n.t("settings.subtitle"))
-                    .font(.system(size: 12))
-                    .foregroundColor(SettingsPalette.secondaryText)
-            }
-        }
-    }
-
     private var headerBlock: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            header
-                .padding(0)
-
-            statusSummary
+        VStack(alignment: .leading, spacing: 2) {
+            Text(L10n.t("settings.title"))
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(SettingsPalette.primaryText)
+            Text(L10n.t("settings.subtitle"))
+                .font(.system(size: 12))
+                .foregroundColor(SettingsPalette.secondaryText)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .glassContainer(cornerRadius: 16)
-    }
-
-    private var statusSummary: some View {
-        HStack(spacing: 10) {
-            SummaryPill(
-                icon: hasAccessibilityPermission ? "checkmark.shield.fill" : "exclamationmark.shield.fill",
-                title: L10n.t("settings.permission.title"),
-                value: hasAccessibilityPermission ? L10n.t("debug.enabled") : L10n.t("settings.status.required"),
-                tint: hasAccessibilityPermission ? SettingsPalette.success : SettingsPalette.warning
-            )
-            SummaryPill(
-                icon: "keyboard.badge.ellipsis",
-                title: L10n.t("settings.unicodeApps.title"),
-                value: "\(unicodeAppsCount)",
-                tint: SettingsPalette.accent
-            )
-            SummaryPill(
-                icon: "nosign.app",
-                title: L10n.t("settings.exclusions.title"),
-                value: "\(exclusionsCount)",
-                tint: SettingsPalette.secondaryText
-            )
-        }
     }
 
     private var languageSection: some View {
@@ -307,6 +271,23 @@ struct SettingsView: View {
                 Button(L10n.t("settings.exclusions.manage")) {
                     showExclusions = true
                 }
+            }
+        }
+    }
+
+    private var versionSection: some View {
+        SettingsSection(
+            icon: "arrow.triangle.2.circlepath",
+            title: L10n.t("settings.version.title"),
+            subtitle: L10n.f(
+                "settings.version.subtitle",
+                AppVersion.displayCurrent,
+                AppVersion.displayBuild
+            ),
+            action: { AppDelegate.shared?.showUpdateWindow() }
+        ) {
+            Button(L10n.t("settings.version.check")) {
+                AppDelegate.shared?.showUpdateWindow()
             }
         }
     }
@@ -792,39 +773,6 @@ private extension View {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .overlay(RoundedRectangle(cornerRadius: cornerRadius).stroke(SettingsPalette.border))
             .shadow(color: SoftTheme.shadow, radius: 18, x: 0, y: 10)
-    }
-}
-
-private struct SummaryPill: View {
-    let icon: String
-    let title: String
-    let value: String
-    let tint: Color
-
-    var body: some View {
-        HStack(spacing: 9) {
-            Image(systemName: icon)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(tint)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(SettingsPalette.mutedText)
-                    .textCase(.uppercase)
-                    .lineLimit(1)
-                Text(value)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(SettingsPalette.primaryText)
-                    .monospacedDigit()
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(SettingsPalette.field)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(SettingsPalette.border))
     }
 }
 
