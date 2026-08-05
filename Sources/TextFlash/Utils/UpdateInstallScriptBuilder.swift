@@ -73,16 +73,24 @@ enum UpdateInstallScriptBuilder {
             fail_update "更新包使用 ad-hoc 签名，拒绝自动更新"
         fi
 
+        # 直接比较 designated requirement 字符串。
+        # 勿把 requirement 塞进 codesign -R 参数：其中含引号，shell 展开后会破坏语法，
+        # 导致同证书更新也被误判为不匹配。
         CURRENT_REQ=$(/usr/bin/codesign -dr - "$TARGET" 2>&1 | sed -n 's/^.*designated => //p')
-        if [ -n "$CURRENT_REQ" ] && ! /usr/bin/codesign --verify --deep --strict -R="designated => $CURRENT_REQ" "$CANDIDATE" 2>/dev/null; then
-            # -dvv 才会输出 Authority=；仅 -dv 在较新系统上没有该字段
-            CURRENT_AUTH=$(/usr/bin/codesign -dvv "$TARGET" 2>&1 | sed -n 's/^Authority=//p' | head -1)
-            CANDIDATE_AUTH=$(/usr/bin/codesign -dvv "$CANDIDATE" 2>&1 | sed -n 's/^Authority=//p' | head -1)
-            # 同一作者证书轮换（CN=Nekutai）时允许继续；辅助功能可能需重新授权
-            if [ -n "$CURRENT_AUTH" ] && [ "$CURRENT_AUTH" = "$CANDIDATE_AUTH" ] && [ "$CURRENT_AUTH" = "Nekutai" ]; then
-                echo "⚠️  签名证书已轮换（同一作者身份），继续安装；辅助功能权限可能需要重新授权" >&2
-            else
-                fail_update "更新包签名身份与当前 App 不匹配，拒绝自动更新。请手动下载：https://github.com/vipic/TextFlash/releases/latest"
+        if [ -z "$CURRENT_REQ" ]; then
+            echo "⚠️  无法读取当前 App 签名要求，跳过签名身份连续性校验" >&2
+        else
+            CANDIDATE_REQ=$(/usr/bin/codesign -dr - "$CANDIDATE" 2>&1 | sed -n 's/^.*designated => //p')
+            if [ "$CANDIDATE_REQ" != "$CURRENT_REQ" ]; then
+                # -dvv 才会输出 Authority=；仅 -dv 在较新系统上没有该字段
+                CURRENT_AUTH=$(/usr/bin/codesign -dvv "$TARGET" 2>&1 | sed -n 's/^Authority=//p' | head -1)
+                CANDIDATE_AUTH=$(/usr/bin/codesign -dvv "$CANDIDATE" 2>&1 | sed -n 's/^Authority=//p' | head -1)
+                # 同一作者证书轮换（CN=Nekutai）时允许继续；辅助功能可能需重新授权
+                if [ -n "$CURRENT_AUTH" ] && [ "$CURRENT_AUTH" = "$CANDIDATE_AUTH" ] && [ "$CURRENT_AUTH" = "Nekutai" ]; then
+                    echo "⚠️  签名证书已轮换（同一作者身份），继续安装；辅助功能权限可能需要重新授权" >&2
+                else
+                    fail_update "更新包签名身份与当前 App 不匹配，拒绝自动更新。请手动下载：https://github.com/vipic/TextFlash/releases/latest"
+                fi
             fi
         fi
 
