@@ -1,6 +1,12 @@
 # Changelog
 
+面向用户的版本说明。GitHub Release 的 commit 列表由 `release.sh` 自动生成；本文件用白话记录「对日常使用有影响」的变化。
+
+发布新版本时：把 `Unreleased` 里的条目挪到对应版本节，并按需补充用户可见说明。0.1.2 至 1.2.1 期间未维护本文件，这些版本的变更见各 [GitHub Release](https://github.com/vipic/textflash/releases) 说明。
+
 ## Unreleased
+
+## 0.1.1 — 2026-06-06
 
 - Added a settings window with app language selection and localized menu/settings/debug strings.
 - Added a launch-at-login control backed by macOS ServiceManagement.
@@ -27,7 +33,7 @@
 - Refresh exclusion UI from exclusion-change notifications and show an error when no target app is available.
 - Use the last non-TextFlash foreground app as the exclusion target so TextFlash windows do not exclude themselves.
 - Extracted snippet matching into a testable matcher with unit coverage.
-- Hardened release packaging with tests, signing/notarization checks, cleanup, and DMG signing.
+- Hardened release packaging with tests, signing checks, cleanup, and DMG signing (release artifacts are self-signed and not notarized).
 - Added Accessibility usage descriptions to generated development and release app bundles.
 - Prevented release packaging from stripping SwiftPM build artifacts and added clean-tree checks for publishing.
 - Added CI for shell syntax checks, Swift tests, and release builds.
