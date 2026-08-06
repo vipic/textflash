@@ -11,8 +11,8 @@
 ## 快速部署开发版
 
 ```bash
-git clone https://github.com/vipic/TextFlash.git
-cd TextFlash
+git clone https://github.com/vipic/textflash.git
+cd textflash
 ./deploy.sh
 ```
 

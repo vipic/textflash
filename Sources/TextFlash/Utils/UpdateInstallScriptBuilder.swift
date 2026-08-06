@@ -89,7 +89,7 @@ enum UpdateInstallScriptBuilder {
                 if [ -n "$CURRENT_AUTH" ] && [ "$CURRENT_AUTH" = "$CANDIDATE_AUTH" ] && [ "$CURRENT_AUTH" = "Nekutai" ]; then
                     echo "⚠️  签名证书已轮换（同一作者身份），继续安装；辅助功能权限可能需要重新授权" >&2
                 else
-                    fail_update "更新包签名身份与当前 App 不匹配，拒绝自动更新。请手动下载：https://github.com/vipic/TextFlash/releases/latest"
+                    fail_update "更新包签名身份与当前 App 不匹配，拒绝自动更新。请手动下载：https://github.com/vipic/textflash/releases/latest"
                 fi
             fi
         fi

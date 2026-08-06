@@ -166,7 +166,7 @@ final class UpdateChecker {
     }
 
     private func fetchLatestRelease() async -> ReleaseInfo? {
-        guard let url = URL(string: "https://api.github.com/repos/vipic/TextFlash/releases/latest") else {
+        guard let url = URL(string: "https://api.github.com/repos/vipic/textflash/releases/latest") else {
             return nil
         }
 

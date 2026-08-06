@@ -22,7 +22,7 @@
 
 | 位置 | 当前做法 | 问题 | 后续方向 |
 | --- | --- | --- | --- |
-| `Sources/TextFlash/Persistence/DatabaseManager.swift` | 已删除首次启动时从 `~/Documents/Github/TextFlash/data/snippets.json` 和 `~/Documents/Luigi/TextFlash/data/snippets.json` 自动迁移旧 JSON 的逻辑 | 旧逻辑是个人开发路径，发布版本不应依赖这些路径 | 继续使用现有手动导入/导出功能处理 JSON 数据 |
+| `Sources/TextFlash/Persistence/DatabaseManager.swift` | 已删除首次启动时从 `~/Documents/Github/textflash/data/snippets.json` 和 `~/Documents/Luigi/TextFlash/data/snippets.json` 自动迁移旧 JSON 的逻辑 | 旧逻辑是个人开发路径，发布版本不应依赖这些路径 | 继续使用现有手动导入/导出功能处理 JSON 数据 |
 
 ## 打包和资源整理
 
