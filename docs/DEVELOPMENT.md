@@ -1,6 +1,6 @@
 # Development
 
-本文档记录 TextFlash 的本地开发、构建和签名要求。发布流程见 [RELEASE.md](../RELEASE.md)。
+本文档记录 TextFlash 的本地开发、构建和签名要求。发布流程见 [RELEASE.md](RELEASE.md)。
 
 ## 环境要求
 

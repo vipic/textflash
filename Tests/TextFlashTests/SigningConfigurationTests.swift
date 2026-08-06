@@ -36,7 +36,7 @@ import Testing
 
     @Test func documentsDescribeReusableAuthorCertificate() throws {
         let developmentGuide = try contents(of: "docs/DEVELOPMENT.md")
-        let releaseGuide = try contents(of: "RELEASE.md")
+        let releaseGuide = try contents(of: "docs/RELEASE.md")
 
         #expect(developmentGuide.contains("TextFlash 必须使用稳定代码签名"))
         #expect(developmentGuide.contains("不要使用 ad-hoc 签名"))

@@ -71,9 +71,18 @@ CI（GitHub Actions）与本地一致，执行 `mise run ci`（脚本语法检�
 
 备份内容包含片段数据库和当前版本对应的偏好设置。登录项由 macOS 管理，恢复后需要在设置里重新确认。
 
+## 文档
+
+- [更新日志](CHANGELOG.md)：面向用户的版本说明。
+- [开发说明](docs/DEVELOPMENT.md)：本地开发、构建和签名要求。
+- [发布流程](docs/RELEASE.md)：版本号、DMG、GitHub Releases、自动更新排查。
+- [mise 命令速查](docs/MISE.md)：全部项目任务入口。
+- [定制化逻辑清单](docs/customization-inventory.md)：当前按应用/场景写死的逻辑与已知限制。
+- [Agent Onboarding](AGENTS.md)：给代码代理使用的架构、坑点和约定。
+
 ## 发布
 
-完整发布流程见 [RELEASE.md](RELEASE.md)。本地签名要求见 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)。
+完整发布流程见 [docs/RELEASE.md](docs/RELEASE.md)。本地签名要求见 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)。
 
 构建 DMG：
 
