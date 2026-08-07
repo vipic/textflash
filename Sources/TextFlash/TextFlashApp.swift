@@ -590,6 +590,14 @@ struct TextFlashApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self)
     private var appDelegate
 
+    init() {
+        // 命令行模式（export/import 片段或配置）：处理完毕直接退出，不启动 GUI 与事件监听
+        let cliArguments = Array(CommandLine.arguments.dropFirst())
+        if !cliArguments.isEmpty {
+            _ = CLIController.handleIfNeeded(arguments: cliArguments)
+        }
+    }
+
     var body: some Scene {
         Settings {
             SettingsView()

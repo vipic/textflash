@@ -56,12 +56,14 @@ mise tasks           # 查看全部任务
 
 ```
 Sources/TextFlash/
-├── TextFlashApp.swift              # @main + AppDelegate (LSUIElement)
+├── TextFlashApp.swift              # @main + AppDelegate (LSUIElement)；init 内拦截命令行参数
 ├── Core/
 │   ├── DataModels.swift            # Snippet / SnippetGroup
 │   ├── EventController.swift       # CGEvent tap + AX/Unicode 注入引擎
 │   ├── SnippetMatcher.swift        # 缩写匹配表
 │   └── VariableProcessor.swift     # 展开变量（剪贴板、日期等）
+├── CLI/
+│   └── CLIController.swift         # 命令行 export/import 片段与配置（GUI 启动前退出）
 ├── Persistence/
 │   ├── DatabaseManager.swift       # SQLite3 C API（纯 Swift，无第三方）
 │   ├── AppSettings.swift           # 语言 / 触发匹配模式等 UserDefaults
@@ -105,6 +107,7 @@ Tests/TextFlashTests/
 分层约定：
 
 - **Core**：领域模型 + 展开引擎（无 SwiftUI）
+- **CLI**：命令行导入导出入口（无 SwiftUI；在 `TextFlashApp.init` 中于 GUI 启动前执行并退出）
 - **Persistence**：SQLite / UserDefaults / Store 桥接
 - **UI**：菜单栏、管理窗、主题与更新 UI
 - **Settings**：设置窗

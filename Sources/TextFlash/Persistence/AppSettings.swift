@@ -55,6 +55,8 @@ enum AppSettingsKeys {
     static let language = "TextFlashAppLanguage"
     static let deletionDelay = "TextFlashDeletionSettleDelayPerCharacter"
     static let triggerMatchingMode = "TextFlashTriggerMatchingMode"
+    static let excludedBundleIDs = "TextFlashExcludedBundleIDs"
+    static let unicodeInputBundleIDs = "TextFlashUnicodeBundleIDs"
 }
 
 @MainActor

@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- Added a command-line interface for exporting and importing snippets and user settings as JSON (same snippet format as the GUI; snippet imports auto-back up before overwriting, keeping the latest 20 backups).
+
 ## 0.1.1 — 2026-06-06
 
 - Added a settings window with app language selection and localized menu/settings/debug strings.

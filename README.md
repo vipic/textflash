@@ -71,6 +71,27 @@ CI（GitHub Actions）与本地一致，执行 `mise run ci`（脚本语法检�
 
 备份内容包含片段数据库和当前版本对应的偏好设置。登录项由 macOS 管理，恢复后需要在设置里重新确认。
 
+## 命令行片段与配置导入导出
+
+直接调用 app 可执行文件即可导出/导入片段和配置（JSON 格式），无需启动 GUI：
+
+```bash
+# 导出全部片段（与 GUI 导出格式一致，默认输出到 stdout）
+"/Applications/TextFlash.app/Contents/MacOS/TextFlash" export snippets --output ~/Desktop/snippets.json
+
+# 导入片段（校验通过后替换全部片段，覆盖前自动备份到 Backups 目录）
+"/Applications/TextFlash.app/Contents/MacOS/TextFlash" import snippets ~/Desktop/snippets.json
+
+# 导出/导入用户配置
+"/Applications/TextFlash.app/Contents/MacOS/TextFlash" export config -o ~/Desktop/config.json
+"/Applications/TextFlash.app/Contents/MacOS/TextFlash" import config ~/Desktop/config.json
+
+# 帮助
+"/Applications/TextFlash.app/Contents/MacOS/TextFlash" --help
+```
+
+导出的配置包含语言、替换时序、触发匹配模式、开机启动、Unicode 输入应用 Bundle ID 与排除应用 Bundle ID。辅助功能授权由 macOS 按机器管理（TCC），无法迁移，不包含在配置中。开发版可替换为 `~/Applications/TextFlash Dev.app/Contents/MacOS/TextFlash`。
+
 ## 文档
 
 - [更新日志](CHANGELOG.md)：面向用户的版本说明。

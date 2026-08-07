@@ -298,9 +298,7 @@ final class SnippetManager: ObservableObject {
     }
 
     func exportJSONData() throws -> Data {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try encoder.encode(SnippetBackup(groups: groups))
+        try SnippetBackup.encode(groups: groups)
     }
 
     func parseImportJSONData(_ data: Data) throws -> [SnippetGroup] {
@@ -351,6 +349,13 @@ final class SnippetManager: ObservableObject {
 
 struct SnippetBackup: Codable {
     let groups: [SnippetGroup]
+
+    /// GUI 与 CLI 共用的导出编码：prettyPrinted + sortedKeys，保证两侧 JSON 格式完全一致
+    static func encode(groups: [SnippetGroup]) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try encoder.encode(SnippetBackup(groups: groups))
+    }
 }
 
 enum SnippetBackupValidator {

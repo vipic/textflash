@@ -139,6 +139,8 @@ struct SnippetManagerView: View {
             Button(L10n.t("snippets.import.confirm"), role: .destructive) {
                 guard let groups = pendingImportedGroups else { return }
                 do {
+                    // 覆盖前自动备份当前片段，导入失败可恢复
+                    try SnippetBackupArchiver.backupCurrentSnippets()
                     try manager.replaceAllGroups(groups)
                 } catch {
                     importExportError = error.localizedDescription

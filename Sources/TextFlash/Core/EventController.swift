@@ -69,25 +69,23 @@ public final class EventController {
     ]
     /// 注入时的事件源标记值（防止自触发）
     private static let injectionTag: Int64 = 0x53_4E_49_50  // "SNIP" in hex
-    private let excludedBundleIDsKey = "TextFlashExcludedBundleIDs"
-    private let unicodeBundleIDsKey = "TextFlashUnicodeBundleIDs"
 
     public var excludedBundleIDs: Set<String> {
         get {
-            Set(UserDefaults.standard.stringArray(forKey: excludedBundleIDsKey) ?? [])
+            Set(UserDefaults.standard.stringArray(forKey: AppSettingsKeys.excludedBundleIDs) ?? [])
         }
         set {
-            UserDefaults.standard.set(Array(newValue).sorted(), forKey: excludedBundleIDsKey)
+            UserDefaults.standard.set(Array(newValue).sorted(), forKey: AppSettingsKeys.excludedBundleIDs)
             NotificationCenter.default.post(name: .textFlashExclusionsDidChange, object: self)
         }
     }
 
     public var unicodeBundleIDs: Set<String> {
         get {
-            Set(UserDefaults.standard.stringArray(forKey: unicodeBundleIDsKey) ?? [])
+            Set(UserDefaults.standard.stringArray(forKey: AppSettingsKeys.unicodeInputBundleIDs) ?? [])
         }
         set {
-            UserDefaults.standard.set(Array(newValue).sorted(), forKey: unicodeBundleIDsKey)
+            UserDefaults.standard.set(Array(newValue).sorted(), forKey: AppSettingsKeys.unicodeInputBundleIDs)
             NotificationCenter.default.post(name: .textFlashUnicodeAppsDidChange, object: self)
         }
     }
