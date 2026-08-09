@@ -213,75 +213,45 @@ SQLite 存 Application Support；管理窗支持 JSON 导入导出。导入前�
 - `.github/workflows/ci.yml`：`main` push 和 pull request 触发；`jdx/mise-action` 后执行 **`mise run ci`**（与本地单一事实来源）
 - `.github/workflows/release-artifact.yml`：仅 `workflow_dispatch`，跑 `release.sh` 并上传 DMG artifact；不自动打 tag / 不创建 GitHub Release
 
-## Git 提交规范（强制）
+<!-- workspace-policy:start hash=2b7fa55c1aed -->
+## 跨项目统一规则
 
-所有提交（人工或 agent）必须使用 Conventional Commits，标题使用中文说明。
+以下区块由私有 `workspace-meta` 生成；项目专属规则请写在区块外。
 
-### 格式
+### 协作
 
-```text
-<type>(<optional-scope>): <中文说明>
-```
+- [LANG-001] 文档、提交标题和用户可见文案默认使用中文。
 
-### 允许的 type
+### Git
 
-- `feat` 新功能
-- `fix` 修 bug
-- `refactor` 重构（不改外部行为）
-- `perf` 性能优化
-- `docs` 文档
-- `test` 测试
-- `build` 构建 / 打包 / 发布链路
-- `ci` CI 配置
-- `chore` 杂务 / 依赖 / 工具
-- `style` 纯格式或样式（不影响逻辑）
+- [GIT-001] 提交使用 Conventional Commits，格式为 `<type>(<optional-scope>): <中文说明>`，标题不以句号结尾。
+- [GIT-002] 未明确要求时不要自动提交；需要提交时先检查 status、diff 和近期提交风格。
+- [GIT-003] 禁止使用 `--no-verify`，不得擅自 amend，也不得添加 Co-Authored-By 或其他 AI/工具署名 trailer。
 
-### 规则
+### 安全
 
-1. `scope` 可选；用短小英文，如 `ui`、`event`、`snippets`
-2. 冒号后必须有一个空格
-3. 标题用中文，完整说明「做了什么 / 为什么」；不要只写「修复」「更新」
-4. 标题尽量不超过 72 字符
-5. 标题不要以句号结尾
-6. 一次提交只做一件事；无关改动拆开提交
-7. 未明确要求时，不要自动 `git commit`
-8. 用户要求提交时，先看 `git status` / `git diff` / 最近提交风格，再起草 message
-9. 不要使用 `--no-verify` 跳过 hook
-10. 不要擅自 `git commit --amend`；仅在用户明确要求且符合安全条件时才 amend
+- [SAFE-001] 保留用户已有和无关改动，不做顺手重构，不使用破坏性 Git 或文件操作。
+- [SAFE-002] 不得提交 `.env`、密钥、个人数据、日志、报告、缓存或构建产物。
 
-### 禁止 Co-Author / 署名尾注
+### 验证
 
-**禁止**在 commit message 中添加任何 co-author、生成器署名或类似 trailer，包括但不限于：
+- [VERIFY-001] 修改后运行仓库声明的统一验证入口；涉及页面流程时补跑对应 E2E。
 
-- `Co-Authored-By: ...`
-- `Co-authored-by: ...`
-- `Signed-off-by: ...`（除非用户或仓库明确要求）
-- `Generated-by: ...` / `Assisted-by: ...` / `Made-with: ...`
-- Cursor / Claude / Codex / Copilot / ChatGPT 等工具署名行
+### 依赖
 
-### 好例子
+- [DEPS-001] 改动保持最小，不引入项目基线之外的新框架、构建工具或生产依赖，除非用户明确要求。
 
-- `feat(event): 支持可配置的 Unicode 注入应用列表`
-- `fix(matcher): 修复中文标点触发符归一遗漏`
-- `refactor(sources): 按 Core/Persistence/UI 分层`
-- `docs(agents): 补充 Accessibility/CGEvent 踩坑`
-- `build(spm): swift-tools 升级到 6.0`
+### 文档
 
-### 坏例子
+- [DOCS-001] 行为、命令或部署方式变化时同步 README 和相关文档，不保留过期引用。
 
-- `修复问题`
-- `update code`
-- `feat: 搞定了`
-- `临时提交一下`
-- `fix(ui): 修复按钮` 后再附加 `Co-Authored-By: Cursor <...>`
+### 工具链
 
-### Body（可选）
+- [MISE-001] 先运行 `mise tasks` 查看入口；构建、测试和部署统一使用 `mise run <task>`，不绕过 mise 手拼命令。
 
-需要时再写正文，说明动机、影响范围或破坏性变更。
+### macOS 应用
 
-## 提交操作约定
-
-1. 默认只改代码，不主动提交
-2. 需要提交时：用 Conventional Commits + 中文标题；优先 HEREDOC 传 message
-3. 禁止添加 Co-Authored-By 或其他 AI/工具署名 trailer
-4. 禁止用 `--no-verify` 绕过校验
+- [SWIFT-001] 使用 SwiftPM executable（swift-tools 6.0）和既有脚本组装应用，不新增 Xcode project。
+- [SWIFT-002] 保持 Nekutai 自签名链路与 `com.nekutai.*` bundle id，严禁 ad-hoc 签名。
+- [SWIFT-003] 新增 shell 脚本纳入 `lint:scripts`；发布继续使用既有 release.sh、DMG 和 GitHub Release 流程。
+<!-- workspace-policy:end -->
