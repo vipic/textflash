@@ -13,6 +13,10 @@ let package = Package(
             name: "TextFlash",
             targets: ["TextFlash"]
         ),
+        .executable(
+            name: "TextFlashReleaseSmoke",
+            targets: ["TextFlashReleaseSmoke"]
+        ),
     ],
     dependencies: [],
     targets: [
@@ -27,6 +31,11 @@ let package = Package(
             name: "TextFlashTests",
             dependencies: ["TextFlash"],
             path: "Tests/TextFlashTests"
+        ),
+        .executableTarget(
+            name: "TextFlashReleaseSmoke",
+            path: "Sources/TextFlashReleaseSmoke",
+            linkerSettings: [.linkedFramework("AppKit")]
         ),
     ],
     // tools 6.0 后默认语言模式为 Swift 6；当前 toolchain 在 SendNonSendable

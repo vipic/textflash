@@ -69,4 +69,6 @@ mise run deploy
 mise run release-auto
 ```
 
+发布阶段日志可通过 `mise run logs:release` 和 `mise run logs:publish` 查看；附加 `-- --full` 输出完整命令日志。
+
 完整任务列表见 [MISE.md](MISE.md)。

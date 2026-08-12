@@ -1,0 +1,26 @@
+name: Release Build Verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify release build
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Install mise
+        uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2
+
+      - name: Verify source and release build
+        run: mise run check
+
+      - name: Explain artifact boundary
+        run: echo "CI 不持有稳定签名私钥；正式 DMG 只在受控 Mac 本机构建。"

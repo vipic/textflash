@@ -157,12 +157,7 @@ mise run release-auto
 ```
 
 发布产物会写入 `dist/`。默认使用稳定代码签名证书 `Nekutai`（可通过 `CODESIGN_IDENTITY` 覆盖）；不支持 ad-hoc 回退。
-
-默认运行测试。跳过测试仅打包查看：
-
-```bash
-RUN_TESTS=false mise run release -- 0.1.0
-```
+发布始终强制执行 `mise run check`；本地脏工作区验收需显式传入 `--allow-dirty`，该参数不能用于正式发布。
 
 发布到 GitHub Releases：
 

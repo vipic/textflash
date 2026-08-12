@@ -7,6 +7,7 @@
 ## Unreleased
 
 - Added a command-line interface for exporting and importing snippets and user settings as JSON (same snippet format as the GUI; snippet imports auto-back up before overwriting, keeping the latest 20 backups).
+- 发布流程强制统一验证与稳定签名，新增正式 DMG 启动验收、SHA-256 附件、本地阶段日志、原子发布回滚和 CI 私钥边界。
 
 ## 0.1.1 — 2026-06-06
 

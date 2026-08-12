@@ -15,12 +15,12 @@ mise run deploy
 ### 生产发布
 
 ```bash
-./release.sh [version]               # 测试 → release 编译 → 签名 → DMG → 烟测，产物在 dist/
-./release.sh [version] --publish     # 额外推 tag 并创建 GitHub Release
+./release.sh <version>               # 统一验证 → release 编译 → 签名 → DMG → 烟测，产物在 dist/
+./release.sh <version> --publish     # 额外原子推送 tag 并创建 GitHub Release
 # 或
 mise run release -- [version]
 mise run release-auto                # 按 Conventional Commits 自动算下一版本
-mise run publish                     # 发布到 GitHub Release
+mise run publish -- <version>        # 显式确认版本后发布 GitHub Release
 ```
 
 ### 一次性设置：代码签名证书
@@ -46,7 +46,7 @@ mise run publish                     # 发布到 GitHub Release
 本地验证入口统一走 mise：
 
 ```bash
-mise run check       # lint:scripts + test + build:release
+mise run check       # lint:scripts + lint:design + test + build:release
 mise tasks           # 查看全部任务
 ```
 
@@ -99,6 +99,7 @@ Tests/TextFlashTests/
 ├── SnippetBackupValidatorTests.swift
 ├── MenuBarMenuFactoryTests.swift
 ├── SigningConfigurationTests.swift
+├── ReleaseWorkflowContractTests.swift
 ├── AppVersionInfoTests.swift
 ├── AppResourceBundleTests.swift
 └── UpdateInstallScriptBuilderTests.swift
@@ -211,7 +212,7 @@ SQLite 存 Application Support；管理窗支持 JSON 导入导出。导入前�
 ## GitHub Actions
 
 - `.github/workflows/ci.yml`：`main` push 和 pull request 触发；`jdx/mise-action` 后执行 **`mise run check`**（与本地单一事实来源）
-- `.github/workflows/release-artifact.yml`：仅 `workflow_dispatch`，跑 `release.sh` 并上传 DMG artifact；不自动打 tag / 不创建 GitHub Release
+- `.github/workflows/release-build-verification.yml`：仅 `workflow_dispatch`，执行 `mise run check`；CI 不持有稳定签名私钥，不生成正式 DMG
 
 <!-- workspace-policy:start hash=2b7fa55c1aed -->
 ## 跨项目统一规则

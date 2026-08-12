@@ -44,15 +44,15 @@ TextFlash 需要辅助功能授权，必须使用稳定代码身份。没有匹�
 
 脚本会执行：
 
-- `swift test`
+- `mise run check`（脚本、设计 token、测试和 release build）
 - 注入 `AppVersion`
 - release 编译
 - 去除调试符号
 - 组装 `.app`
 - 固定作者级证书签名
 - 使用品牌背景打包 DMG，并在最终可写镜像上由 Finder 现场生成图标布局
-- DMG 烟测
-- 输出 SHA256
+- `hdiutil verify` 与 SHA-256 校验文件
+- 从 DMG 复制并首次启动正式 bundle，验证签名、版本、菜单栏激活策略和图标
 
 产物在：
 
@@ -89,35 +89,32 @@ Constraints: no words, no letters, no labels, no app icons, no folder icons, no 
 - 当前 commit 没有不匹配的 tag
 - `gh auth status` 可用
 
-脚本会推送 tag `v0.1.12` 并创建 GitHub Release。
+脚本会创建 annotated tag `v0.1.12`，原子推送 `main` 与 tag，再创建 GitHub Release。已有同名 tag 或 Release 时直接停止，不覆盖资产；Release 创建失败时回滚本轮 tag。DMG 和同名 `.sha256` 会一起上传。
 
-## GitHub Actions 构建 Artifact
+## 发布耗时与本地日志
+
+每次本地 release/publish 的阶段耗时、退出码和完整命令输出保存在 `.local/logs/`。查看摘要或完整日志：
+
+```bash
+mise run logs:release
+mise run logs:release -- --full
+mise run logs:publish
+```
+
+## GitHub Actions 构建验证
 
 仓库里有两个 workflow：
 
 - `CI`：`main` 分支 push 和 pull request 自动触发，执行脚本语法检查、`swift test` 和 release build。
-- `Release Artifact`：只支持手动触发，不会因为 push、tag 或 PR 自动运行。
+- `Release Build Verification`：只支持手动触发，执行 `mise run check`。
 
-手动构建 DMG artifact：
+手动验证 release build：
 
 1. 打开 GitHub 仓库的 **Actions**
-2. 选择 **Release Artifact**
+2. 选择 **Release Build Verification**
 3. 点击 **Run workflow**
-4. 输入裸版本号，例如 `0.1.12`
 
-该 workflow 会执行：
-
-```bash
-./release.sh "0.1.12" --force
-```
-
-然后校验 DMG、校验 `CFBundleShortVersionString`，并上传：
-
-```text
-TextFlash-0.1.12.dmg
-```
-
-作为 workflow artifact。它只生成 artifact，不会创建 GitHub Release，也不会推送 tag。
+CI 不导入或保存 `Nekutai` 私钥，因此不会组装、签名或上传正式 DMG。正式制品只在持有稳定证书的受控 Mac 上通过本地 `release.sh` 生成。
 
 ## 没有开发者账号时的限制
 
@@ -150,8 +147,7 @@ TextFlash-0.1.12.dmg
 
 ```bash
 git status --short
-swift test -Xswiftc -DDISABLE_PREVIEWS
-swift build -c release -Xswiftc -Osize -Xswiftc -DDISABLE_PREVIEWS
+mise run check
 ./release.sh 0.1.12
 ```
 

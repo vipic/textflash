@@ -26,7 +26,7 @@ mise run check
 - `build`：debug 编译，带 `-DDISABLE_PREVIEWS`。
 - `test`：Swift 单测，带 `-DDISABLE_PREVIEWS`。
 - `build:release`：release 编译，带 `-Osize` 与 `-DDISABLE_PREVIEWS`。
-- `check`：脚本语法检查、单测、release 编译。
+- `check`：脚本语法、设计 token、单测和 release 编译。
 
 ## 应用工作流
 
@@ -59,15 +59,21 @@ mise run version:next
 
 ```bash
 mise run release -- 0.1.12
-mise run release -- 0.1.12 --force
+mise run release -- 0.1.12 --allow-dirty
 mise run release-auto
-mise run release-auto -- --force
 mise run publish -- 0.1.12
-mise run publish
 ```
 
 - `release`：显式传版本号和参数给 `release.sh`。
-- `release-auto`：先计算下一个版本号，再执行 `release.sh`。
-- `publish`：执行 `release.sh <version> --publish`。不传版本号时，会先自动计算下一个版本。
+- `release-auto`：自动计算下一个版本号，仅构建本地正式制品。
+- `publish`：执行 `release.sh <version> --publish`，必须显式确认版本号。
+
+正式制品和日志验收：
+
+```bash
+mise run smoke:release -- dist/TextFlash-1.3.1.dmg 1.3.1
+mise run logs:release
+mise run logs:release -- --full
+```
 
 凡是要传给底层脚本的参数，都放在 `--` 后面。

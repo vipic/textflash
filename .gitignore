@@ -14,6 +14,7 @@ Package.resolved
 dist/
 .release_staging/
 .deploy_staging/
+.local/
 
 # ── IDE ──
 .idea/
