@@ -50,7 +50,7 @@ TextFlash 需要辅助功能授权，必须使用稳定代码身份。没有匹�
 - 去除调试符号
 - 组装 `.app`
 - 固定作者级证书签名
-- 打包并美化 DMG
+- 使用品牌背景打包 DMG，并在最终可写镜像上由 Finder 现场生成图标布局
 - DMG 烟测
 - 输出 SHA256
 
@@ -58,6 +58,22 @@ TextFlash 需要辅助功能授权，必须使用稳定代码身份。没有匹�
 
 ```text
 dist/TextFlash-0.1.12.dmg
+```
+
+### DMG 背景生成提示词
+
+背景使用 Codex 内置 ImageGen 生成；生成结果居中裁切后保存为 `Resources/dmg-background@2x.png`（1080×700），再缩放生成 `Resources/dmg-background.png`（540×350）。重建时使用以下提示词：
+
+```text
+Use case: ads-marketing
+Asset type: Retina macOS DMG installer background for TextFlash
+Primary request: Create a polished 1080×700 landscape installer background that guides dragging the TextFlash app from the left to Applications on the right.
+Scene/backdrop: very pale lavender-white surface with a subtle clean text-editor grid and faint flowing text-line rhythm.
+Style/medium: restrained premium native macOS utility aesthetic, clean flat illustration with very soft depth.
+Composition/framing: exactly two equal-size large rounded-square recessed wells, one centered around x=280 and one centered around x=800, both centered vertically around y=375; a thin muted lavender-gray arrow points from the left well to the right well. Leave both wells empty for Finder icons. Keep generous clean margins and uncluttered space.
+Color palette: warm white, pale lavender, muted indigo, one tiny soft peach accent.
+Brand motif: a very faint abstract transformation motif near the lower center—short text-like horizontal strokes flowing through a subtle lightning-shaped cursor into longer strokes—purely abstract, no readable characters.
+Constraints: no words, no letters, no labels, no app icons, no folder icons, no logos, no screenshots, no watermark signature. Do not place any object inside the two icon wells. Exact landscape aspect ratio 1080:700.
 ```
 
 ## 发布到 GitHub Releases
