@@ -20,13 +20,13 @@ mise tasks
 mise run build
 mise run test
 mise run build:release
-mise run ci
+mise run check
 ```
 
 - `build`：debug 编译，带 `-DDISABLE_PREVIEWS`。
 - `test`：Swift 单测，带 `-DDISABLE_PREVIEWS`。
 - `build:release`：release 编译，带 `-Osize` 与 `-DDISABLE_PREVIEWS`。
-- `ci`：脚本语法检查、单测、release 编译。
+- `check`：脚本语法检查、单测、release 编译。
 
 ## 应用工作流
 

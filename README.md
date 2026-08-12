@@ -69,12 +69,12 @@ mise tasks
 完整 mise 命令速查见 [docs/MISE.md](docs/MISE.md)。常用入口：
 
 ```bash
-mise run ci
+mise run check
 mise run deploy
 mise run release-auto
 ```
 
-CI（GitHub Actions）与本地一致，执行 `mise run ci`（脚本语法检查 + `swift test` + release 构建）。源码按 `Core / Persistence / UI / Settings / Utils` 分层，Agent 约定见 [`AGENTS.md`](AGENTS.md)。重要变更详见 `CHANGELOG.md`。
+CI（GitHub Actions）与本地一致，执行 `mise run check`（脚本语法检查 + `swift test` + release 构建）。源码按 `Core / Persistence / UI / Settings / Utils` 分层，Agent 约定见 [`AGENTS.md`](AGENTS.md)。重要变更详见 `CHANGELOG.md`。
 
 ## 片段管理
 

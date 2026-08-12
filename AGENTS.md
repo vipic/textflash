@@ -46,7 +46,7 @@ mise run publish                     # 发布到 GitHub Release
 本地验证入口统一走 mise：
 
 ```bash
-mise run ci          # lint:scripts + test + build:release
+mise run check       # lint:scripts + test + build:release
 mise tasks           # 查看全部任务
 ```
 
@@ -210,7 +210,7 @@ SQLite 存 Application Support；管理窗支持 JSON 导入导出。导入前�
 
 ## GitHub Actions
 
-- `.github/workflows/ci.yml`：`main` push 和 pull request 触发；`jdx/mise-action` 后执行 **`mise run ci`**（与本地单一事实来源）
+- `.github/workflows/ci.yml`：`main` push 和 pull request 触发；`jdx/mise-action` 后执行 **`mise run check`**（与本地单一事实来源）
 - `.github/workflows/release-artifact.yml`：仅 `workflow_dispatch`，跑 `release.sh` 并上传 DMG artifact；不自动打 tag / 不创建 GitHub Release
 
 <!-- workspace-policy:start hash=2b7fa55c1aed -->

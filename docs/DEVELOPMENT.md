@@ -64,7 +64,7 @@ swift build -c release -Xswiftc -Osize -Xswiftc -DDISABLE_PREVIEWS
 如果使用 `mise`，可以通过统一任务入口执行常用命令：
 
 ```bash
-mise run ci
+mise run check
 mise run deploy
 mise run release-auto
 ```

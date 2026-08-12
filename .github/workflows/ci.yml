@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   ci:
-    name: mise run ci
+    name: mise run check
     runs-on: macos-15
 
     steps:
@@ -25,4 +25,4 @@ jobs:
         uses: jdx/mise-action@v2
 
       - name: CI
-        run: mise run ci
+        run: mise run check
