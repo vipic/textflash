@@ -1,6 +1,44 @@
-# TextFlash
+<p align="center">
+  <img src="docs/screenshots/icon.png" width="96" alt="TextFlash icon">
+</p>
+
+<h1 align="center">TextFlash</h1>
+
+<p align="center">
+  <strong>macOS 菜单栏文本展开工具</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
+  <img src="https://img.shields.io/badge/Swift-6.0-orange" alt="Swift 6.0">
+  <a href="https://github.com/vipic/textflash/releases"><img src="https://img.shields.io/github/v/release/vipic/textflash" alt="GitHub Release"></a>
+</p>
+
+<p align="center">
+  <a href="#功能特点">功能</a> ·
+  <a href="#安装">安装</a> ·
+  <a href="#开发">开发</a> ·
+  <a href="#文档">文档</a> ·
+  <a href="#关联项目">关联项目</a>
+</p>
 
 TextFlash 是一款 macOS 菜单栏文本展开工具，基于 SwiftUI 和 SQLite 构建。
+
+## 功能特点
+
+- **缩写展开**：输入缩写后自动替换为常用文本，支持剪贴板、日期等变量。
+- **片段管理**：按分组维护片段，可通过 JSON 导入、导出和迁移。
+- **应用适配**：可排除指定应用，也可为终端、Electron 等应用切换 Unicode 输入。
+- **本地存储**：片段保存在本机 SQLite 数据库，不依赖云端服务。
+- **备份恢复**：提供应用内自动备份，以及可供外部自动化调用的命令行工具。
+
+## 安装
+
+从 [GitHub Releases](https://github.com/vipic/textflash/releases) 下载最新 DMG，打开后将 `TextFlash.app` 拖入 `/Applications`。
+
+当前发布产物没有开发者账号签名和公证，首次打开时可能需要在系统设置中允许运行。文本展开需要 macOS 辅助功能权限；如果无法触发展开，请在设置中检查权限状态。
+
+菜单栏中，**左键**打开片段管理，**右键**打开菜单（检查更新、设置、Unicode 输入等）。
 
 ## 开发
 
@@ -35,10 +73,6 @@ mise run ci
 mise run deploy
 mise run release-auto
 ```
-
-文本展开需要 macOS 辅助功能权限。如果无法触发展开，请通过设置检查权限状态。
-
-菜单栏：**左键**打开片段管理，**右键**打开菜单（检查更新、设置、Unicode 输入等）。
 
 CI（GitHub Actions）与本地一致，执行 `mise run ci`（脚本语法检查 + `swift test` + release 构建）。源码按 `Core / Persistence / UI / Settings / Utils` 分层，Agent 约定见 [`AGENTS.md`](AGENTS.md)。重要变更详见 `CHANGELOG.md`。
 
@@ -100,6 +134,11 @@ CI（GitHub Actions）与本地一致，执行 `mise run ci`（脚本语法检�
 - [mise 命令速查](docs/MISE.md)：全部项目任务入口。
 - [定制化逻辑清单](docs/customization-inventory.md)：当前按应用/场景写死的逻辑与已知限制。
 - [Agent Onboarding](AGENTS.md)：给代码代理使用的架构、坑点和约定。
+
+## 关联项目
+
+- [Pastry](https://github.com/vipic/pastry)：记录、搜索和回看临时剪贴板历史；TextFlash 更适合长期、高频文本，两者互补。
+- [mac-as-code](https://github.com/vipic/mac-as-code)：可安装 TextFlash，并备份、恢复片段和应用配置的 macOS 配置脚本。
 
 ## 发布
 
