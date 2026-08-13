@@ -89,7 +89,7 @@ Constraints: no words, no letters, no labels, no app icons, no folder icons, no 
 - 当前 commit 没有不匹配的 tag
 - `gh auth status` 可用
 
-脚本会创建 annotated tag `v0.1.12`，原子推送 `main` 与 tag，再创建 GitHub Release。已有同名 tag 或 Release 时直接停止，不覆盖资产；Release 创建失败时回滚本轮 tag。DMG 和同名 `.sha256` 会一起上传。
+脚本会读取上一个正式标签之后的 Conventional Commits，生成应用内可直接阅读的逐条更新日志；随后创建 annotated tag `v0.1.12`，原子推送 `main` 与 tag，再创建 GitHub Release。已有同名 tag 或 Release 时直接停止，不覆盖资产；Release 创建失败时回滚本轮 tag。DMG 和同名 `.sha256` 会一起上传。
 
 ## 发布耗时与本地日志
 

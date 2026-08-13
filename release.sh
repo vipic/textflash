@@ -294,6 +294,8 @@ command_log_run release_smoke "$PROJECT_DIR/scripts/release_smoke.sh" "$DMG_PATH
 
 if $PUBLISH; then
     step 8 "发布到 GitHub Releases"
+    RELEASE_NOTES_PATH="$STAGING/release-notes.md"
+    "$PROJECT_DIR/scripts/generate_release_notes.sh" > "$RELEASE_NOTES_PATH"
     git tag -a "$TAG" -m "$APP_NAME $VERSION"
     if ! command_log_run git_push_atomic git push --atomic origin "HEAD:refs/heads/main" "refs/tags/$TAG"; then
         git tag -d "$TAG" >/dev/null
@@ -301,7 +303,7 @@ if $PUBLISH; then
         exit 1
     fi
     if ! command_log_run gh_release_create gh release create "$TAG" \
-        --repo "$REPOSITORY" --generate-notes --title "$APP_NAME $VERSION" \
+        --repo "$REPOSITORY" --notes-file "$RELEASE_NOTES_PATH" --title "$APP_NAME $VERSION" \
         "$DMG_PATH" "$CHECKSUM_PATH"; then
         git push origin ":refs/tags/$TAG" >/dev/null 2>&1 || true
         git tag -d "$TAG" >/dev/null

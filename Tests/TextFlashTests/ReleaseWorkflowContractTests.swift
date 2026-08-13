@@ -18,6 +18,9 @@ import Testing
         #expect(release.contains("command_log_run mise_check mise run check"))
         #expect(release.contains("git push --atomic"))
         #expect(release.contains("gh release create"))
+        #expect(release.contains("scripts/generate_release_notes.sh"))
+        #expect(release.contains("--notes-file"))
+        #expect(!release.contains("--generate-notes"))
         #expect(!release.contains("--clobber"))
         #expect(!release.contains("RUN_TESTS=false"))
     }
