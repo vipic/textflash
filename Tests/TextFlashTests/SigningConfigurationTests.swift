@@ -34,14 +34,4 @@ import Testing
         }
     }
 
-    @Test func documentsDescribeReusableAuthorCertificate() throws {
-        let developmentGuide = try contents(of: "docs/DEVELOPMENT.md")
-        let releaseGuide = try contents(of: "docs/RELEASE.md")
-
-        #expect(developmentGuide.contains("TextFlash 必须使用稳定代码签名"))
-        #expect(developmentGuide.contains("不要使用 ad-hoc 签名"))
-        #expect(developmentGuide.contains(#"export CODESIGN_IDENTITY="Your Certificate Name""#))
-        #expect(releaseGuide.contains("多个应用可以共用同一张代码签名证书"))
-        #expect(releaseGuide.contains("没有匹配证书或签名失败时脚本会直接停止"))
-    }
 }

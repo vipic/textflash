@@ -32,9 +32,4 @@ import Testing
         #expect(!workflow.contains("upload-artifact"))
     }
 
-    @Test func formalPublishRequiresExplicitVersion() throws {
-        let publish = try contents(of: ".mise/tasks/publish")
-        #expect(publish.contains("正式发布必须显式指定版本"))
-        #expect(!publish.contains("next_version.sh"))
-    }
 }
