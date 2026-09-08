@@ -13,6 +13,7 @@ final class DatabaseManager {
     private var db: OpaquePointer?
     private let dbPath: String
     private(set) var initializationError: String?
+    private(set) var lastReadError: String?
 
     /// 数据库 schema 版本（PRAGMA user_version）
     private var schemaVersion: Int32 {
@@ -105,12 +106,19 @@ final class DatabaseManager {
         let version = schemaVersion
         if version < 1 { schemaVersion = 1 }
         if version < 2 {
-            migrateUniqueAbbreviations()
-            schemaVersion = 2
+            guard migrateUniqueAbbreviations() else {
+                initializationError = "数据库迁移失败：无法建立缩写唯一约束"
+                return
+            }
+            guard execute("PRAGMA user_version = 2;") else {
+                initializationError = "数据库迁移失败：无法保存 schema 版本"
+                return
+            }
         }
     }
 
-    private func migrateUniqueAbbreviations() {
+    @discardableResult
+    private func migrateUniqueAbbreviations() -> Bool {
         transaction {
             guard execute("""
                 WITH ranked AS (
@@ -121,7 +129,7 @@ final class DatabaseManager {
                     FROM snippets
                 )
                 UPDATE snippets
-                SET abbreviation = abbreviation || '__duplicate_' || rowid
+                SET abbreviation = '__textflash_migration_duplicate_' || rowid || '_' || abbreviation
                 WHERE rowid IN (
                     SELECT rowid
                     FROM ranked
@@ -194,17 +202,27 @@ final class DatabaseManager {
         lock.lock(); defer { lock.unlock() }
         guard db != nil else {
             print("[DatabaseManager] query prepare 失败: database is nil")
+            lastReadError = "database is nil"
             return []
         }
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK, let s = stmt else {
             print("[DatabaseManager] query prepare 失败: \(lastError())")
+            lastReadError = lastError()
             return []
         }
         defer { sqlite3_finalize(s) }
         bind(s)
         var results: [T] = []
-        while sqlite3_step(s) == SQLITE_ROW { results.append(row(s)) }
+        var rc = sqlite3_step(s)
+        while rc == SQLITE_ROW {
+            results.append(row(s))
+            rc = sqlite3_step(s)
+        }
+        if rc != SQLITE_DONE {
+            lastReadError = lastError()
+            print("[DatabaseManager] query step 失败: \(lastReadError ?? "未知错误")")
+        }
         return results
     }
 
@@ -216,6 +234,7 @@ final class DatabaseManager {
     }
 
     func fetchAllGroups() -> [SnippetGroup] {
+        lastReadError = nil
         let groups = queryParam("SELECT id, name, sort_order FROM groups ORDER BY sort_order;", bind: { _ in }) { stmt in
             let id = UUID(uuidString: String(cString: sqlite3_column_text(stmt, 0))) ?? UUID()
             let name = String(cString: sqlite3_column_text(stmt, 1))

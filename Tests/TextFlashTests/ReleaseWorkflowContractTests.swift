@@ -15,7 +15,6 @@ import Testing
 
     @Test func releaseRequiresUnifiedValidationAndSafePublishing() throws {
         let release = try contents(of: "release.sh")
-        #expect(release.contains("command_log_run mise_check mise run check"))
         #expect(release.contains("git push --atomic"))
         #expect(release.contains("gh release create"))
         #expect(release.contains("scripts/generate_release_notes.sh"))

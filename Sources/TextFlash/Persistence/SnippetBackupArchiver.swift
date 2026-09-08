@@ -21,7 +21,14 @@ enum SnippetBackupArchiver {
         let fileManager = FileManager.default
         try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
 
-        let groups = DatabaseManager.shared.fetchAllGroups()
+        let database = DatabaseManager.shared
+        guard database.initializationError == nil else {
+            throw SnippetImportExportError.databaseWriteFailed
+        }
+        let groups = database.fetchAllGroups()
+        guard database.lastReadError == nil else {
+            throw SnippetImportExportError.databaseWriteFailed
+        }
         let data = try SnippetBackup.encode(groups: groups)
 
         let stamp = Self.timestamp()

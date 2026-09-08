@@ -210,7 +210,11 @@ enum CLIController {
     // MARK: - 片段导出 / 导入
 
     static func exportSnippetsData() throws -> Data {
-        try SnippetBackup.encode(groups: DatabaseManager.shared.fetchAllGroups())
+        let database = DatabaseManager.shared
+        guard database.initializationError == nil else { throw CLIError.databaseWriteFailed }
+        let groups = database.fetchAllGroups()
+        guard database.lastReadError == nil else { throw CLIError.databaseWriteFailed }
+        return try SnippetBackup.encode(groups: groups)
     }
 
     static func importSnippets(from path: String) throws {
