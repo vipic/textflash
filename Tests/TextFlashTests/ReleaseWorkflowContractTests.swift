@@ -13,17 +13,6 @@ import Testing
         try String(contentsOf: repositoryRoot.appendingPathComponent(relativePath), encoding: .utf8)
     }
 
-    @Test func releaseRequiresUnifiedValidationAndSafePublishing() throws {
-        let release = try contents(of: "release.sh")
-        #expect(release.contains("git push --atomic"))
-        #expect(release.contains("gh release create"))
-        #expect(release.contains("scripts/generate_release_notes.sh"))
-        #expect(release.contains("--notes-file"))
-        #expect(!release.contains("--generate-notes"))
-        #expect(!release.contains("--clobber"))
-        #expect(!release.contains("RUN_TESTS=false"))
-    }
-
     @Test func ciDoesNotBuildUnsignedFormalArtifacts() throws {
         let workflow = try contents(of: ".github/workflows/release-build-verification.yml")
         #expect(workflow.contains("mise run check"))

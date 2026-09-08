@@ -17,15 +17,12 @@ final class DatabaseManager {
 
     /// 数据库 schema 版本（PRAGMA user_version）
     private var schemaVersion: Int32 {
-        get {
-            guard db != nil else { return 0 }
-            var stmt: OpaquePointer?
-            guard sqlite3_prepare_v2(db, "PRAGMA user_version;", -1, &stmt, nil) == SQLITE_OK else { return 0 }
-            defer { sqlite3_finalize(stmt) }
-            guard sqlite3_step(stmt) == SQLITE_ROW else { return 0 }
-            return sqlite3_column_int(stmt, 0)
-        }
-        set { execute("PRAGMA user_version = \(newValue);") }
+        guard db != nil else { return 0 }
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, "PRAGMA user_version;", -1, &stmt, nil) == SQLITE_OK else { return 0 }
+        defer { sqlite3_finalize(stmt) }
+        guard sqlite3_step(stmt) == SQLITE_ROW else { return 0 }
+        return sqlite3_column_int(stmt, 0)
     }
 
     private init() {
@@ -49,6 +46,13 @@ final class DatabaseManager {
         }
 
         dbPath = dir.appendingPathComponent("textflash.db").path
+        guard openDatabase() else { return }
+        createTables()
+        runMigrations()
+    }
+
+    init(testDatabasePath: String) {
+        dbPath = testDatabasePath
         guard openDatabase() else { return }
         createTables()
         runMigrations()
@@ -104,14 +108,9 @@ final class DatabaseManager {
 
     private func runMigrations() {
         let version = schemaVersion
-        if version < 1 { schemaVersion = 1 }
         if version < 2 {
             guard migrateUniqueAbbreviations() else {
                 initializationError = "数据库迁移失败：无法建立缩写唯一约束"
-                return
-            }
-            guard execute("PRAGMA user_version = 2;") else {
-                initializationError = "数据库迁移失败：无法保存 schema 版本"
                 return
             }
         }
@@ -120,23 +119,35 @@ final class DatabaseManager {
     @discardableResult
     private func migrateUniqueAbbreviations() -> Bool {
         transaction {
-            guard execute("""
-                WITH ranked AS (
-                    SELECT
-                        rowid,
-                        abbreviation,
-                        ROW_NUMBER() OVER (PARTITION BY abbreviation ORDER BY rowid) AS duplicate_rank
-                    FROM snippets
-                )
-                UPDATE snippets
-                SET abbreviation = '__textflash_migration_duplicate_' || rowid || '_' || abbreviation
-                WHERE rowid IN (
-                    SELECT rowid
-                    FROM ranked
-                    WHERE duplicate_rank > 1
-                );
-            """) else { return false }
-            return execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_snippets_abbr_unique ON snippets(abbreviation);")
+            let rows: [(Int64, String)] = queryParam(
+                "SELECT rowid, abbreviation FROM snippets ORDER BY rowid;",
+                bind: { _ in }
+            ) { statement in
+                (sqlite3_column_int64(statement, 0), String(cString: sqlite3_column_text(statement, 1)))
+            }
+            guard lastReadError == nil else { return false }
+
+            var used = Set(rows.map(\.1))
+            var seen = Set<String>()
+            for (rowID, abbreviation) in rows {
+                if seen.insert(abbreviation).inserted { continue }
+                let base = "__textflash_migration_duplicate_\(rowID)_\(abbreviation)"
+                var candidate = base
+                var suffix = 1
+                while used.contains(candidate) {
+                    candidate = "\(base)_\(suffix)"
+                    suffix += 1
+                }
+                guard executeParam("UPDATE snippets SET abbreviation = ? WHERE rowid = ?;", bind: { statement in
+                    sqlite3_bind_text(statement, 1, candidate, -1, SQLITE_TRANSIENT)
+                    sqlite3_bind_int64(statement, 2, rowID)
+                }) else { return false }
+                used.insert(candidate)
+            }
+            guard execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_snippets_abbr_unique ON snippets(abbreviation);") else {
+                return false
+            }
+            return execute("PRAGMA user_version = 2;")
         }
     }
 
@@ -150,6 +161,10 @@ final class DatabaseManager {
     @discardableResult
     private func execute(_ sql: String) -> Bool {
         lock.lock(); defer { lock.unlock() }
+        guard initializationError == nil else {
+            print("[DatabaseManager] SQL 执行已阻止: 数据库初始化失败")
+            return false
+        }
         guard db != nil else {
             print("[DatabaseManager] SQL 执行失败: database is nil")
             return false
@@ -167,6 +182,7 @@ final class DatabaseManager {
     @discardableResult
     private func transaction(_ body: () -> Bool) -> Bool {
         lock.lock(); defer { lock.unlock() }
+        guard initializationError == nil else { return false }
         guard execute("BEGIN IMMEDIATE TRANSACTION;") else { return false }
         if body() {
             return execute("COMMIT;")
@@ -180,6 +196,10 @@ final class DatabaseManager {
     @discardableResult
     private func executeParam(_ sql: String, bind: (OpaquePointer) -> Void) -> Bool {
         lock.lock(); defer { lock.unlock() }
+        guard initializationError == nil else {
+            print("[DatabaseManager] 参数化写入已阻止: 数据库初始化失败")
+            return false
+        }
         guard db != nil else {
             print("[DatabaseManager] prepare 失败: database is nil — \(sql.prefix(60))")
             return false

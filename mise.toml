@@ -12,7 +12,15 @@ run = "swift test -Xswiftc -DDISABLE_PREVIEWS"
 
 [tasks."lint:scripts"]
 description = "Check shell scripts for syntax errors"
-run = "bash -n deploy.sh && bash -n release.sh && bash -n scripts/next_version.sh && bash -n scripts/generate_release_notes.sh && bash -n scripts/check_design_tokens.sh && bash -n scripts/diagnostics.sh && bash -n scripts/lib/command_log.sh && bash -n scripts/verify_release.sh && bash -n scripts/release_smoke.sh && bash -n Sources/TextFlash/Resources/Tools/textflash-backup.sh && bash -n Sources/TextFlash/Resources/Tools/textflash-restore.sh && bash -n .mise/tasks/release && bash -n .mise/tasks/release-auto && bash -n .mise/tasks/publish"
+run = "bash -n deploy.sh && bash -n release.sh && bash -n scripts/next_version.sh && bash -n scripts/generate_release_notes.sh && bash -n scripts/check_design_tokens.sh && bash -n scripts/diagnostics.sh && bash -n scripts/lib/command_log.sh && bash -n scripts/verify_release.sh && bash -n scripts/release_smoke.sh && bash -n Sources/TextFlash/Resources/Tools/textflash-backup.sh && bash -n Sources/TextFlash/Resources/Tools/textflash-restore.sh && bash -n Tests/Scripts/restore_behavior_test.sh && bash -n Tests/Scripts/release_gate_test.sh && bash -n .mise/tasks/release && bash -n .mise/tasks/release-auto && bash -n .mise/tasks/publish"
+
+[tasks."test:restore"]
+description = "Run isolated restore failure-path tests"
+run = "Tests/Scripts/restore_behavior_test.sh"
+
+[tasks."test:release-gate"]
+description = "Verify failed validation blocks publishing commands"
+run = "Tests/Scripts/release_gate_test.sh"
 
 [tasks."lint:design"]
 description = "Check that color literals stay in SoftTheme.swift"
@@ -23,6 +31,8 @@ description = "Run the standard local validation suite"
 run = [
   "mise run lint:scripts",
   "mise run lint:design",
+  "mise run test:restore",
+  "mise run test:release-gate",
   "mise run test",
   "mise run build:release",
 ]

@@ -14,14 +14,16 @@ enum SnippetBackupArchiver {
     /// 将当前数据库中的全部片段备份为 JSON 快照并清理旧备份。
     /// 返回写入的快照 URL。
     @discardableResult
-    static func backupCurrentSnippets() throws -> URL {
-        guard let directory = backupsDirectory else {
+    static func backupCurrentSnippets(
+        database: DatabaseManager = .shared,
+        directory requestedDirectory: URL? = backupsDirectory
+    ) throws -> URL {
+        guard let directory = requestedDirectory else {
             throw SnippetImportExportError.databaseWriteFailed
         }
         let fileManager = FileManager.default
         try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
 
-        let database = DatabaseManager.shared
         guard database.initializationError == nil else {
             throw SnippetImportExportError.databaseWriteFailed
         }
