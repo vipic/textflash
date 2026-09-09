@@ -131,10 +131,11 @@ CI（GitHub Actions）与本地一致，执行 `mise run check`（脚本语法�
 
 - [更新日志](CHANGELOG.md)：面向用户的版本说明。
 - [开发说明](docs/DEVELOPMENT.md)：本地开发、构建和签名要求。
+- [架构与模块](docs/architecture/README.md)：当前数据流、模块边界和关键不变量。
 - [发布流程](docs/RELEASE.md)：版本号、DMG、GitHub Releases、自动更新排查。
 - [mise 命令速查](docs/MISE.md)：全部项目任务入口。
 - [定制化逻辑清单](docs/customization-inventory.md)：当前按应用/场景写死的逻辑与已知限制。
-- [Agent Onboarding](AGENTS.md)：给代码代理使用的架构、坑点和约定。
+- [Agent 工作约束](AGENTS.md)：给代码代理使用的最小工作规则。
 
 ## 关联项目
 
@@ -148,7 +149,7 @@ CI（GitHub Actions）与本地一致，执行 `mise run check`（脚本语法�
 构建 DMG：
 
 ```bash
-mise run release -- 0.1.0
+mise run release -- 1.2.3
 ```
 
 按 git message 自动计算下一个版本并构建 DMG：
@@ -163,7 +164,7 @@ mise run release-auto
 发布到 GitHub Releases：
 
 ```bash
-mise run release -- 0.1.0 --publish
+mise run publish -- 1.2.3
 ```
 
-`--publish` 需要在 `main` 分支、Git 工作区干净，脚本会推送 tag 并创建 GitHub Release。
+发布任务需要在 `main` 分支、Git 工作区干净，脚本会推送 tag 并创建 GitHub Release。

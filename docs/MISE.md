@@ -57,11 +57,13 @@ mise run version:next
 
 ## 发布
 
+以下 `1.2.3` 仅表示版本号格式，不代表当前版本：
+
 ```bash
-mise run release -- 0.1.12
-mise run release -- 0.1.12 --allow-dirty
+mise run release -- 1.2.3
+mise run release -- 1.2.3 --allow-dirty
 mise run release-auto
-mise run publish -- 0.1.12
+mise run publish -- 1.2.3
 ```
 
 - `release`：显式传版本号和参数给 `release.sh`。
@@ -71,7 +73,7 @@ mise run publish -- 0.1.12
 正式制品和日志验收：
 
 ```bash
-mise run smoke:release -- dist/TextFlash-1.3.1.dmg 1.3.1
+mise run smoke:release -- dist/TextFlash-1.2.3.dmg 1.2.3
 mise run logs:release
 mise run logs:release -- --full
 ```

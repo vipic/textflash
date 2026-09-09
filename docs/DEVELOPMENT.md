@@ -53,10 +53,10 @@ swift build -Xswiftc -DDISABLE_PREVIEWS
 swift build -c release -Xswiftc -Osize -Xswiftc -DDISABLE_PREVIEWS
 ```
 
-这只会生成 SwiftPM 可执行文件，不会组装 `.app` 或 DMG。完整发布包请使用：
+这只会生成 SwiftPM 可执行文件，不会组装 `.app` 或 DMG。完整发布包请使用（`1.2.3` 仅为格式示例）：
 
 ```bash
-./release.sh 0.1.12
+./release.sh 1.2.3
 ```
 
 ## mise 入口

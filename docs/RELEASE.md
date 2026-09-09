@@ -28,18 +28,18 @@ TextFlash 需要辅助功能授权，必须使用稳定代码身份。没有匹�
 
 ## 版本号规则
 
-发布命令传裸版本号：
+发布命令传裸版本号。以下 `1.2.3` 仅表示格式，不代表当前版本：
 
 ```bash
-./release.sh 0.1.12
+./release.sh 1.2.3
 ```
 
-脚本内部会自动生成 Git tag `v0.1.12`。如果传入 `v0.1.12`，脚本也会先剥掉前缀 `v`，避免应用内更新检查出现 `vv0.1.12`。
+脚本内部会自动生成 Git tag `v1.2.3`。如果传入 `v1.2.3`，脚本也会先剥掉前缀 `v`，避免应用内更新检查出现重复前缀。
 
 ## 本地构建 DMG
 
 ```bash
-./release.sh 0.1.12
+./release.sh 1.2.3
 ```
 
 脚本会执行：
@@ -57,7 +57,7 @@ TextFlash 需要辅助功能授权，必须使用稳定代码身份。没有匹�
 产物在：
 
 ```text
-dist/TextFlash-0.1.12.dmg
+dist/TextFlash-1.2.3.dmg
 ```
 
 ### DMG 背景生成提示词
@@ -79,7 +79,7 @@ Constraints: no words, no letters, no labels, no app icons, no folder icons, no 
 ## 发布到 GitHub Releases
 
 ```bash
-./release.sh 0.1.12 --publish
+./release.sh 1.2.3 --publish
 ```
 
 发布模式要求：
@@ -89,7 +89,7 @@ Constraints: no words, no letters, no labels, no app icons, no folder icons, no 
 - 当前 commit 没有不匹配的 tag
 - `gh auth status` 可用
 
-脚本会读取上一个正式标签之后的 Conventional Commits，生成应用内可直接阅读的逐条更新日志；随后创建 annotated tag `v0.1.12`，原子推送 `main` 与 tag，再创建 GitHub Release。已有同名 tag 或 Release 时直接停止，不覆盖资产；Release 创建失败时回滚本轮 tag。DMG 和同名 `.sha256` 会一起上传。
+脚本会读取上一个正式标签之后的 Conventional Commits，生成应用内可直接阅读的逐条更新日志；随后创建对应的 annotated tag，原子推送 `main` 与 tag，再创建 GitHub Release。已有同名 tag 或 Release 时直接停止，不覆盖资产；Release 创建失败时回滚本轮 tag。DMG 和同名 `.sha256` 会一起上传。
 
 ## 发布耗时与本地日志
 
@@ -148,7 +148,7 @@ CI 不导入或保存 `Nekutai` 私钥，因此不会组装、签名或上传正
 ```bash
 git status --short
 mise run check
-./release.sh 0.1.12
+./release.sh 1.2.3
 ```
 
 确认 DMG 可以挂载，拖入 `/Applications` 后应用可启动，再执行 `--publish`。
