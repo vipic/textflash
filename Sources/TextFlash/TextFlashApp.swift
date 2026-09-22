@@ -16,8 +16,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var aboutWindow: NSWindow?
     private var updateWindow: NSWindow?
     private var editKeyMonitor: Any?
-    private let updateErrorPath = "/tmp/textflash_update_error.txt"
-
     func applicationDidFinishLaunching(_ notification: Notification) {
         Self.shared = self
         // LSUIElement：隐藏 Dock 图标
@@ -295,10 +293,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func showPendingUpdateErrorIfNeeded() {
-        let url = URL(fileURLWithPath: updateErrorPath)
-        guard let message = try? String(contentsOf: url, encoding: .utf8)
-            .trimmingCharacters(in: .whitespacesAndNewlines),
-              !message.isEmpty else { return }
+        guard let url = UpdateChecker.updateErrorReportURL,
+              let message = UpdateChecker.readUpdateErrorReport(at: url)
+        else { return }
 
         try? FileManager.default.removeItem(at: url)
         showUpdateErrorWindow(message: message)

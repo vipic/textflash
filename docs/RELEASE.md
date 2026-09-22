@@ -129,19 +129,16 @@ CI 不导入或保存 `Nekutai` 私钥，因此不会组装、签名或上传正
 
 ## 自动更新失败日志
 
-应用内自动更新会生成 helper 脚本并替换 `.app`。如果安装失败，日志写入：
+应用内自动更新会生成 helper 脚本并替换 `.app`。helper 的日志和错误原因写在 App 自己的数据目录：
 
 ```text
-/tmp/textflash_update.log
+~/Library/Application Support/TextFlash/update.log
+~/Library/Application Support/TextFlash/update_error.txt
 ```
 
-如果是 Bundle ID、版本号、签名或安装校验失败，helper 还会写入面向用户的错误原因：
+固定 `/tmp` 路径是世界可写的，其他本机账户可以伪造随后由 App 展示的错误文本，因此不再用于持久化更新诊断。
 
-```text
-/tmp/textflash_update_error.txt
-```
-
-旧 App 被重新打开后会读取错误文件并显示更新失败窗口。排查时优先查看 `textflash_update.log`，需要确认用户看到的错误文案时再查看 `textflash_update_error.txt`。安装脚本会先备份旧版本，再复制新版本；复制失败时会恢复旧 App。
+如果是 Bundle ID、版本号、签名或安装校验失败，helper 会覆盖 `update_error.txt`。旧 App 被重新打开后最多读取 2 KB 并显示更新失败窗口。排查时优先查看 `update.log`，需要确认用户看到的错误文案时再查看 `update_error.txt`。安装脚本会先备份旧版本，再复制新版本；复制失败时会恢复旧 App。
 
 ## 发布前检查清单
 

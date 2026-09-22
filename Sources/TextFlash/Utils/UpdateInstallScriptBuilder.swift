@@ -5,8 +5,8 @@ enum UpdateInstallScriptBuilder {
         """
         #!/bin/bash
         set -e
-        if [ "$#" -ne 4 ]; then
-            echo "Usage: $0 dmg-path target-app expected-version current-pid" >&2
+        if [ "$#" -ne 5 ]; then
+            echo "Usage: $0 dmg-path target-app expected-version current-pid update-directory" >&2
             exit 2
         fi
 
@@ -14,11 +14,14 @@ enum UpdateInstallScriptBuilder {
         TARGET="$2"
         EXPECTED_VERSION="$3"
         CURRENT_PID="$4"
-        LOG="/tmp/textflash_update.log"
-        ERROR_FILE="/tmp/textflash_update_error.txt"
+        UPDATE_DIR="$5"
+        LOG="$UPDATE_DIR/update.log"
+        ERROR_FILE="$UPDATE_DIR/update_error.txt"
+        umask 077
+        mkdir -p "$UPDATE_DIR"
+        rm -f "$LOG"
         exec >> "$LOG" 2>&1
         echo "TextFlash update started at $(date)"
-        echo "Target: $TARGET"
         echo "Expected version: $EXPECTED_VERSION"
         echo "Waiting for current process to exit: $CURRENT_PID"
         for _ in $(seq 1 100); do
@@ -32,6 +35,7 @@ enum UpdateInstallScriptBuilder {
         fi
         TARGET_PARENT=$(dirname "$TARGET")
         TARGET_NAME=$(basename "$TARGET")
+        echo "Target app: $TARGET_NAME"
         BACKUP="$TARGET_PARENT/.${TARGET_NAME}.update-backup-$(date +%s)"
         rm -f "$ERROR_FILE"
 

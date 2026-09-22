@@ -181,3 +181,4 @@
 "update.error.invalidURL" = "Invalid download URL";
 "update.error.insecureURL" = "Download URL must use HTTPS";
 "update.error.downloadFailed" = "Download failed";
+"update.error.diagnosticsUnavailable" = "Unable to access the app data directory";

@@ -8,6 +8,7 @@ import Testing
     #expect(script.contains("TARGET=\"$2\""))
     #expect(script.contains("EXPECTED_VERSION=\"$3\""))
     #expect(script.contains("CURRENT_PID=\"$4\""))
+    #expect(script.contains("UPDATE_DIR=\"$5\""))
 }
 
 @Test func updateInstallScriptRejectsMismatchedSigningIdentity() {
@@ -26,7 +27,12 @@ import Testing
 @Test func updateInstallScriptPersistsUserVisibleFailureReason() {
     let script = UpdateInstallScriptBuilder.script()
 
-    #expect(script.contains("ERROR_FILE=\"/tmp/textflash_update_error.txt\""))
+    #expect(script.contains(#"LOG="$UPDATE_DIR/update.log""#))
+    #expect(script.contains(#"ERROR_FILE="$UPDATE_DIR/update_error.txt""#))
+    #expect(script.contains("umask 077"))
+    #expect(script.contains("mkdir -p \"$UPDATE_DIR\""))
+    #expect(!script.contains("/tmp/textflash_update_error.txt"))
+    #expect(!script.contains("/tmp/textflash_update.log"))
     #expect(script.contains("fail_update()"))
     #expect(script.contains("printf \"%s\\n\" \"$1\" > \"$ERROR_FILE\""))
 }

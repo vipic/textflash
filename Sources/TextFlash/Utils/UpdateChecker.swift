@@ -5,6 +5,7 @@ import OSLog
 final class UpdateChecker {
     static let shared = UpdateChecker()
     fileprivate static let maxDownloadBytes: Int64 = 300 * 1024 * 1024
+    static let maxUpdateErrorBytes = 2 * 1024
 
     private let log = Logger(subsystem: "com.nekutai.textflash", category: "update")
     private let session: URLSession
@@ -107,6 +108,11 @@ final class UpdateChecker {
     }
 
     func applyUpdate(dmgAt tempURL: URL, expectedVersion: String) throws {
+        guard let updateDirectory = Self.updateDiagnosticsDirectory else {
+            throw UpdateError.diagnosticsUnavailable
+        }
+        try FileManager.default.createDirectory(at: updateDirectory, withIntermediateDirectories: true)
+
         let stableDMG = URL(fileURLWithPath: NSTemporaryDirectory() + "textflash_update.dmg")
         try? FileManager.default.removeItem(at: stableDMG)
         try FileManager.default.moveItem(at: tempURL, to: stableDMG)
@@ -125,7 +131,8 @@ final class UpdateChecker {
             stableDMG.path,
             Bundle.main.bundlePath,
             Self.displayVersion(expectedVersion),
-            String(ProcessInfo.processInfo.processIdentifier)
+            String(ProcessInfo.processInfo.processIdentifier),
+            updateDirectory.path
         ]
         try task.run()
 
@@ -148,6 +155,28 @@ final class UpdateChecker {
     static func displayVersion(_ version: String) -> String {
         version.trimmingCharacters(in: .whitespacesAndNewlines)
             .replacingOccurrences(of: #"^v+"#, with: "", options: .regularExpression)
+    }
+
+    static var updateDiagnosticsDirectory: URL? {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("TextFlash", isDirectory: true)
+    }
+
+    static var updateErrorReportURL: URL? {
+        updateDiagnosticsDirectory?.appendingPathComponent("update_error.txt")
+    }
+
+    static func readUpdateErrorReport(at url: URL, maxBytes: Int = maxUpdateErrorBytes) -> String? {
+        guard maxBytes > 0,
+              let handle = try? FileHandle(forReadingFrom: url)
+        else { return nil }
+        defer { try? handle.close() }
+
+        guard let data = try? handle.read(upToCount: maxBytes),
+              let text = String(data: data, encoding: .utf8)
+        else { return nil }
+        let message = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return message.isEmpty ? nil : message
     }
 
     fileprivate static func downloadProgress(totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64, expectedSize: Int) -> Double? {
@@ -192,12 +221,14 @@ final class UpdateChecker {
         case invalidURL
         case insecureURL
         case downloadFailed
+        case diagnosticsUnavailable
 
         var errorDescription: String? {
             switch self {
             case .invalidURL: return L10n.t("update.error.invalidURL")
             case .insecureURL: return L10n.t("update.error.insecureURL")
             case .downloadFailed: return L10n.t("update.error.downloadFailed")
+            case .diagnosticsUnavailable: return L10n.t("update.error.diagnosticsUnavailable")
             }
         }
     }

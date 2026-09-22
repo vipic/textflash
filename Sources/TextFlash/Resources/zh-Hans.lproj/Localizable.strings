@@ -181,3 +181,4 @@
 "update.error.invalidURL" = "下载链接无效";
 "update.error.insecureURL" = "下载链接必须使用 HTTPS";
 "update.error.downloadFailed" = "下载失败";
+"update.error.diagnosticsUnavailable" = "无法访问应用数据目录";
