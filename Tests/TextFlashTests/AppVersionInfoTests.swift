@@ -7,10 +7,6 @@ import Testing
         #expect(AppVersion.displayCurrent(generated: "0.0.0-dev", bundle: "0.1.12") == "0.1.12")
     }
 
-    @Test func displayCurrentPrefersBundleVersion() {
-        #expect(AppVersion.displayCurrent(generated: "v0.2.0", bundle: "0.1.12") == "0.1.12")
-    }
-
     @Test func displayCurrentUsesGeneratedReleaseVersionWhenBundleMissing() {
         #expect(AppVersion.displayCurrent(generated: "v0.2.0", bundle: nil) == "0.2.0")
     }

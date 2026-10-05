@@ -72,3 +72,7 @@ mise run release-auto
 发布阶段日志可通过 `mise run logs:release` 和 `mise run logs:publish` 查看；附加 `-- --full` 输出完整命令日志。
 
 完整任务列表见 [MISE.md](MISE.md)。
+
+### 测试边界
+
+CI 工作流通过配置审阅确认，不用源码字符串断言复刻 YAML。`mise run check` 中的 `test:release-gate` 在隔离目录注入检查失败，验证不会继续推送或创建发布；备份恢复行为测试和签名边界检查继续保留。
