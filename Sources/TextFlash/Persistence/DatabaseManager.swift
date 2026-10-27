@@ -40,7 +40,8 @@ final class DatabaseManager {
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         } catch {
             dbPath = dir.appendingPathComponent("textflash.db").path
-            initializationError = "无法创建数据库目录: \(error.localizedDescription)"
+            let nsError = error as NSError
+            initializationError = "无法创建数据库目录（\(nsError.domain) \(nsError.code)）"
             print("[DatabaseManager] \(initializationError ?? "初始化失败")")
             return
         }
@@ -68,7 +69,7 @@ final class DatabaseManager {
     private func openDatabase() -> Bool {
         if sqlite3_open(dbPath, &db) != SQLITE_OK {
             initializationError = "无法打开数据库: \(lastError())"
-            print("[DatabaseManager] \(initializationError ?? "初始化失败") (\(dbPath))")
+            print("[DatabaseManager] \(initializationError ?? "初始化失败")")
             if let db = db { sqlite3_close(db) }
             db = nil
             return false
@@ -76,7 +77,7 @@ final class DatabaseManager {
         execute("PRAGMA journal_mode=WAL;")
         execute("PRAGMA synchronous=FULL;")
         execute("PRAGMA foreign_keys=ON;")
-        print("[DatabaseManager] 数据库已打开: \(dbPath)")
+        print("[DatabaseManager] 数据库已打开")
         return true
     }
 
