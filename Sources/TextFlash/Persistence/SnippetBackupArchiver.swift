@@ -54,7 +54,7 @@ enum SnippetBackupArchiver {
         ) else { return }
 
         let sorted = contents
-            .filter { $0.pathExtension == "json" }
+            .filter { $0.pathExtension == "json" && $0.lastPathComponent.hasPrefix("textflash-snippets-") }
             .sorted { lhs, rhs in
                 let lhsDate = try? lhs.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
                 let rhsDate = try? rhs.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate

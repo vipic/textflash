@@ -95,6 +95,24 @@ import Testing
         #expect(try FileManager.default.contentsOfDirectory(atPath: backups.path).count == SnippetBackupArchiver.maxBackups + 1)
     }
 
+    @Test func backupPruningPreservesUnrelatedJSON() throws {
+        let directory = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let database = DatabaseManager(testDatabasePath: directory.appendingPathComponent("data.db").path)
+        let backups = directory.appendingPathComponent("backups")
+        try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
+        let unrelated = backups.appendingPathComponent("other.json")
+        try Data("keep".utf8).write(to: unrelated)
+        for index in 0...SnippetBackupArchiver.maxBackups {
+            let file = backups.appendingPathComponent("textflash-snippets-old-\(index).json")
+            try Data("old".utf8).write(to: file)
+        }
+        try SnippetBackupArchiver.backupCurrentSnippets(database: database, directory: backups)
+        #expect(try Data(contentsOf: unrelated) == Data("keep".utf8))
+        let files = try FileManager.default.contentsOfDirectory(atPath: backups.path)
+        #expect(files.filter { $0.hasPrefix("textflash-snippets-") }.count == SnippetBackupArchiver.maxBackups)
+    }
+
     @Test func validEmptyDatabaseExportsNormally() throws {
         let directory = try temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }

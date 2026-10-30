@@ -78,3 +78,5 @@ mise run release-auto
 缩写匹配使用纯逻辑测试覆盖最长后缀优先、较长前缀等待、共享 Trie 分支删除、Unicode 字素、替换和清空，避免依赖真实键盘注入。
 
 CI 工作流通过配置审阅确认，不用源码字符串断言复刻 YAML。`mise run check` 中的 `test:release-gate` 在隔离目录注入检查失败，验证不会继续推送或创建发布；备份恢复行为测试和签名边界检查继续保留。
+
+备份保留策略仅清理 `textflash-snippets-*.json`，同目录其他 JSON 文件不参与清理。
