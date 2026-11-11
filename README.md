@@ -28,7 +28,7 @@ TextFlash 是一款 macOS 菜单栏文本展开工具，基于 SwiftUI 和 SQLit
 
 - **缩写展开**：输入缩写后自动替换为常用文本，支持剪贴板、日期等变量。
 - **片段管理**：按分组维护片段，可通过 JSON 导入、导出和迁移。
-- **应用适配**：可排除指定应用，也可为终端、Electron 等应用切换 Unicode 输入。
+- **应用适配**：可排除指定应用；终端、Electron 等不稳定支持辅助功能写入的应用可改用 Unicode 输入，写入被静默忽略时会自动记住该应用。
 - **本地存储**：片段保存在本机 SQLite 数据库，不依赖云端服务。
 - **备份恢复**：提供应用内自动备份，以及可供外部自动化调用的命令行工具。
 
@@ -74,7 +74,7 @@ mise run deploy
 mise run release-auto
 ```
 
-CI（GitHub Actions）与本地一致，执行 `mise run check`（脚本语法检查 + `swift test` + release 构建）。源码按 `Core / Persistence / UI / Settings / Utils` 分层，Agent 约定见 [`AGENTS.md`](AGENTS.md)。重要变更详见 `CHANGELOG.md`。
+CI（GitHub Actions）与本地一致，执行 `mise run check`（脚本语法检查 + 设计 token 检查 + 恢复/发布门禁脚本测试 + `swift test` + release 构建）。源码按 `Core / Persistence / UI / Settings / Utils` 分层，模块边界、数据流与关键不变量见 [`docs/architecture/README.md`](docs/architecture/README.md)。
 
 ## 片段管理
 
@@ -92,7 +92,11 @@ CI（GitHub Actions）与本地一致，执行 `mise run check`（脚本语法�
 
 ## 应用排除
 
-在设置中可管理排除列表与 Unicode 输入应用。排除列表按 bundle identifier 存储在 `UserDefaults` 中。菜单栏右键可快速将当前应用加入 Unicode 输入列表。
+在设置中可管理排除列表与 Unicode 输入应用，两者都按 bundle identifier 存储在 `UserDefaults` 中。
+
+- 排除列表中的应用不会触发展开。
+- Unicode 输入列表中的应用跳过常规辅助功能写入，直接合成 Unicode 按键事件。终端、Electron、WebView 等应用通常需要这一路径。
+- 菜单栏右键可把当前应用加入 Unicode 输入列表；如果某个应用对辅助功能写入返回成功但内容没有落地，TextFlash 会在复查确认后自动把该应用加入列表，可在设置中移除。
 
 ## 命令行备份与恢复
 
@@ -129,12 +133,12 @@ CI（GitHub Actions）与本地一致，执行 `mise run check`（脚本语法�
 
 ## 文档
 
-- [更新日志](CHANGELOG.md)：面向用户的版本说明。
-- [开发说明](docs/DEVELOPMENT.md)：本地开发、构建和签名要求。
-- [架构与模块](docs/architecture/README.md)：当前数据流、模块边界和关键不变量。
-- [发布流程](docs/RELEASE.md)：版本号、DMG、GitHub Releases、自动更新排查。
+- [开发说明](docs/DEVELOPMENT.md)：本地环境、构建、测试、签名与人工验收。
+- [架构与模块](docs/architecture/README.md)：运行时数据流、模块边界、持久化与关键不变量。
+- [发布流程](docs/RELEASE.md)：版本号、DMG 构建与验收、GitHub Releases、应用内更新与诊断。
 - [mise 命令速查](docs/MISE.md)：全部项目任务入口。
-- [定制化逻辑清单](docs/customization-inventory.md)：当前按应用/场景写死的逻辑与已知限制。
+- [定制化逻辑清单](docs/customization-inventory.md)：按应用/场景写死的逻辑与已知限制。
+- [应用备注](docs/app-notes.md)：设计资产、图标 Prompt 与 DMG 布局。
 - [Agent 工作约束](AGENTS.md)：给代码代理使用的最小工作规则。
 
 ## 关联项目
