@@ -1,5 +1,6 @@
 import Cocoa
 import CoreGraphics
+import OSLog
 
 extension Notification.Name {
     static let textFlashExclusionsDidChange = Notification.Name("TextFlashExclusionsDidChange")
@@ -69,6 +70,10 @@ public final class EventController {
     ]
     /// 注入时的事件源标记值（防止自触发）
     private static let injectionTag: Int64 = 0x53_4E_49_50  // "SNIP" in hex
+    /// 注入诊断日志：只记录 bundle id 与策略，不写正文
+    private static let log = Logger(subsystem: "com.nekutai.textflash", category: "injection")
+    /// AX 写入后复查延迟：等待异步落地的应用更新可观测属性
+    private static let silentInsertionRecheckDelay = 60
 
     public var excludedBundleIDs: Set<String> {
         get {
@@ -459,18 +464,18 @@ public final class EventController {
                 let insertionText = processedText + (triggerChar.map(String.init) ?? "")
                 if self.shouldPreferUnicodeInsertionForFocusedApplication() {
                     self.postUnicodeString(insertionText)
-                } else if !self.replaceFocusedSelection(with: insertionText) {
-                    self.postUnicodeString(insertionText)
-                }
-
-                // Step 6: 移动光标到 {cursor} 位置
-                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(20)) { [weak self] in
-                    guard let self = self else { return }
-                    if cursorOffset >= 0 {
-                        let triggerLen = triggerChar != nil ? 1 : 0
-                        self.moveCursorLeft(by: processedText.count + triggerLen - cursorOffset)
-                    }
-                    self.isInjecting = false
+                    self.finishInjection(
+                        cursorOffset: cursorOffset,
+                        triggerChar: triggerChar,
+                        textLength: processedText.count
+                    )
+                } else {
+                    self.insertWithAccessibilityFallback(
+                        insertionText,
+                        cursorOffset: cursorOffset,
+                        triggerChar: triggerChar,
+                        textLength: processedText.count
+                    )
                 }
             }
         }
@@ -484,14 +489,131 @@ public final class EventController {
         event.post(tap: .cghidEventTap)
     }
 
-    private func replaceFocusedSelection(with text: String) -> Bool {
-        guard !text.isEmpty else { return true }
-        guard let element = focusedTextElement() else { return false }
-        return AXUIElementSetAttributeValue(
+    /// 优先通过 Accessibility 写入展开文本；AX 返回成功并不代表内容真的落地，
+    /// 部分应用（Electron / 自绘输入框等）会静默忽略写入。
+    /// 写入前后对比可观测快照，必要时延迟复查，确认失败后回退 Unicode 并记住该应用。
+    private func insertWithAccessibilityFallback(
+        _ text: String,
+        cursorOffset: Int,
+        triggerChar: Character?,
+        textLength: Int
+    ) {
+        func finish() {
+            finishInjection(cursorOffset: cursorOffset, triggerChar: triggerChar, textLength: textLength)
+        }
+
+        guard !text.isEmpty else { return finish() }
+        guard let element = focusedTextElement() else {
+            postUnicodeString(text)
+            return finish()
+        }
+
+        let snapshotBefore = axInsertionSnapshot(of: element)
+        let targetBundleID = currentTargetBundleID()
+        guard AXUIElementSetAttributeValue(
             element,
             kAXSelectedTextAttribute as CFString,
             text as CFTypeRef
-        ) == .success
+        ) == .success else {
+            postUnicodeString(text)
+            return finish()
+        }
+
+        // 应用不暴露任何可校验属性时只能信任 AX，避免重复写入。
+        guard snapshotBefore.isObservable else { return finish() }
+        guard !axInsertionSnapshot(of: element).confirmsChange(from: snapshotBefore) else { return finish() }
+
+        // AX 声称成功但快照未变：稍后复查一次，避免把异步落地的应用误判为失败。
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Self.silentInsertionRecheckDelay)) { [weak self] in
+            guard let self = self else { return }
+            guard !self.axInsertionSnapshot(of: element).confirmsChange(from: snapshotBefore) else {
+                return finish()
+            }
+            self.postUnicodeString(text)
+            self.rememberUnicodeApplication(afterSilentAXFailureFor: targetBundleID)
+            finish()
+        }
+    }
+
+    /// Step 6: 按 {cursor} 偏移移动光标并解除注入状态。
+    private func finishInjection(cursorOffset: Int, triggerChar: Character?, textLength: Int) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(20)) { [weak self] in
+            guard let self = self else { return }
+            if cursorOffset >= 0 {
+                let triggerLen = triggerChar != nil ? 1 : 0
+                self.moveCursorLeft(by: textLength + triggerLen - cursorOffset)
+            }
+            self.isInjecting = false
+        }
+    }
+
+    /// AX 写入被静默忽略：把当前应用加入 Unicode 输入列表，后续展开直接走 Unicode。
+    private func rememberUnicodeApplication(afterSilentAXFailureFor bundleID: String?) {
+        guard let bundleID else { return }
+        var bundleIDs = unicodeBundleIDs
+        guard bundleIDs.insert(bundleID).inserted else { return }
+        unicodeBundleIDs = bundleIDs
+        Self.log.notice("AX 写入未落地，已将应用加入 Unicode 输入列表: \(bundleID, privacy: .public)")
+    }
+
+    /// 写入目标应用（排除 TextFlash 自身），用于把失败学习结果归到正确的 bundle id。
+    private func currentTargetBundleID() -> String? {
+        stateLock.lock()
+        let fallbackApp = lastNonTextFlashApplication
+        stateLock.unlock()
+
+        guard let app = focusedApplicationInfo() ?? fallbackApp, !app.isTextFlash else { return nil }
+        return app.bundleID
+    }
+
+    /// AX 可观测的插入结果快照，用于识别“返回成功但内容未落地”。
+    struct AXInsertionSnapshot {
+        var characterCount: Int?
+        var selectedRange: CFRange?
+
+        var isObservable: Bool {
+            characterCount != nil || selectedRange != nil
+        }
+
+        /// 任一可观测值发生变化即认为写入生效；读数变得不可用同样按生效处理，避免误判。
+        func confirmsChange(from previous: AXInsertionSnapshot) -> Bool {
+            if let old = previous.characterCount, let new = characterCount {
+                if new != old { return true }
+            } else if previous.characterCount != nil || characterCount != nil {
+                return true
+            }
+
+            if let old = previous.selectedRange, let new = selectedRange {
+                if new.location != old.location || new.length != old.length { return true }
+            } else if previous.selectedRange != nil || selectedRange != nil {
+                return true
+            }
+
+            return false
+        }
+    }
+
+    private func axInsertionSnapshot(of element: AXUIElement) -> AXInsertionSnapshot {
+        var snapshot = AXInsertionSnapshot()
+
+        var countValue: CFTypeRef?
+        if AXUIElementCopyAttributeValue(
+            element, kAXNumberOfCharactersAttribute as CFString, &countValue
+        ) == .success, let number = countValue as? NSNumber {
+            snapshot.characterCount = number.intValue
+        }
+
+        var rangeValue: CFTypeRef?
+        if AXUIElementCopyAttributeValue(
+            element, kAXSelectedTextRangeAttribute as CFString, &rangeValue
+        ) == .success, let axValue = rangeValue, CFGetTypeID(axValue) == AXValueGetTypeID() {
+            var range = CFRange()
+            if AXValueGetValue(axValue as! AXValue, .cfRange, &range) {
+                snapshot.selectedRange = range
+            }
+        }
+
+        return snapshot
     }
 
     private func normalizedMatchingCharacter(_ character: Character) -> Character {
