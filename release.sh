@@ -97,7 +97,7 @@ if [ -n "$(git status --porcelain)" ] && ! $ALLOW_DIRTY; then
     exit 1
 fi
 if [ "$IDENTITY" = "-" ] || ! security find-identity -v -p codesigning | grep -Fq "\"$IDENTITY\""; then
-    echo "❌ 找不到稳定代码签名身份：$IDENTITY；不会回退为 ad-hoc。"
+    echo "❌ 找不到稳定代码签名身份：${IDENTITY}；不会回退为 ad-hoc。"
     exit 1
 fi
 if git rev-parse --verify --quiet "refs/tags/$TAG" >/dev/null; then
@@ -117,7 +117,7 @@ if $PUBLISH; then
         exit 1
     fi
     if gh release view "$TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
-        echo "❌ GitHub Release 已存在：$TAG；拒绝覆盖正式制品。"
+        echo "❌ GitHub Release 已存在：${TAG}；拒绝覆盖正式制品。"
         exit 1
     fi
 fi
